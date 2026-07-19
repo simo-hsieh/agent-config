@@ -1,0 +1,41 @@
+{
+  "defaultThinkingLevel": "medium",
+  "defaultProjectTrust": "ask",
+  "enableSkillCommands": true,
+  "subagents": {
+    "agentOverrides": {
+      "reviewer": {
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash"
+        ],
+        "acceptanceRole": "read-only"
+      },
+      "context-builder": {
+        "disabled": true
+      },
+      "delegate": {
+        "disabled": true
+      }
+    }
+  },
+  "packages": [
+    {
+      "source": "git:github.com/nicobailon/pi-web-access@7bdc30a65cf77273eb9c0034647b373bda4060d7",
+      "extensions": [],
+      "skills": []
+    },
+    {
+      "source": "git:github.com/nicobailon/pi-subagents@d6e8005e3958adea634bf27c615abac7407aedc4",
+      "skills": [],
+      "prompts": []
+    }
+  ],
+  "theme": "dark",
+  "lastChangelogVersion": "0.80.10",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-sol"
+}
