@@ -99,6 +99,11 @@ if want pi; then
   if [ "$WITH_SETTINGS" -eq 1 ]; then
     link_item "$ROOT/pi/settings.json" "$HOME/.pi/agent/settings.json"
   fi
+  make_dir "$HOME/.pi/agent/skills"
+  for skill in "$ROOT"/pi/skills/*; do
+    [ -d "$skill" ] || continue
+    link_item "$skill" "$HOME/.pi/agent/skills/${skill##*/}"
+  done
   make_dir "$HOME/.pi/agent/prompts"
   for prompt in "$ROOT"/prompts/*.md; do
     [ -f "$prompt" ] || continue

@@ -16,6 +16,7 @@ _agent/
 │   └── settings.json      shared Claude Code settings
 ├── pi/
 │   ├── agents/            managed Pi subagent definitions
+│   ├── skills/            reviewed Pi-specific skills and provenance
 │   ├── settings.json      shared Pi settings and pinned package manifest
 │   ├── subagents.json     conservative pi-subagents runtime limits
 │   └── PACKAGES.md        package review and upgrade policy
@@ -82,6 +83,7 @@ Adapters are installed as follows:
 ~/.pi/agent/AGENTS.md      -> AGENTS.md
 ~/.pi/agent/settings.json                    -> pi/settings.json      (--with-settings only)
 ~/.pi/agent/prompts/*                        -> prompts/*
+~/.pi/agent/skills/gws-*                     -> pi/skills/gws-*
 ~/.pi/agent/agents/*                         -> pi/agents/*
 ~/.pi/agent/extensions/subagent/config.json  -> pi/subagents.json
 

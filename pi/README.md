@@ -15,7 +15,7 @@ Check the CLI:
 pi --version
 ```
 
-The currently reviewed configuration targets Pi `0.80.10`.
+The currently reviewed configuration targets Pi `0.82.1`.
 
 ## Preview
 
@@ -56,6 +56,7 @@ pi update --extensions
 ~/.pi/agent/AGENTS.md                           -> <repo>/AGENTS.md
 ~/.pi/agent/settings.json                       -> <repo>/pi/settings.json  (--with-settings only)
 ~/.pi/agent/prompts/*                           -> <repo>/prompts/*
+~/.pi/agent/skills/gws-*                        -> <repo>/pi/skills/gws-*
 ~/.pi/agent/agents/researcher.md                 -> <repo>/pi/agents/researcher.md
 ~/.pi/agent/extensions/subagent/config.json      -> <repo>/pi/subagents.json
 ~/.agents/skills/*                               -> <repo>/skills/*
@@ -70,6 +71,9 @@ Run from the repository root:
 ```sh
 ROOT=$(pwd -P)
 test "$(readlink "$HOME/.pi/agent/AGENTS.md")" = "$ROOT/AGENTS.md"
+test "$(readlink "$HOME/.agents/skills/evidence-learning-loop")" = "$ROOT/skills/evidence-learning-loop"
+test "$(readlink "$HOME/.pi/agent/skills/gws-shared")" = "$ROOT/pi/skills/gws-shared"
+test "$(readlink "$HOME/.pi/agent/skills/gws-drive-upload")" = "$ROOT/pi/skills/gws-drive-upload"
 test "$(readlink "$HOME/.pi/agent/agents/researcher.md")" = "$ROOT/pi/agents/researcher.md"
 test "$(readlink "$HOME/.pi/agent/extensions/subagent/config.json")" = "$ROOT/pi/subagents.json"
 test "$(readlink "$HOME/.pi/agent/prompts/research.md")" = "$ROOT/prompts/research.md"
@@ -94,7 +98,13 @@ nicobailon/pi-web-access
 nicobailon/pi-subagents
 ```
 
-Start a new Pi session and ask:
+Start a new Pi session. Confirm the evidence skill loads without warnings by running:
+
+```text
+/skill:evidence-learning-loop
+```
+
+Then ask:
 
 ```text
 Show me the available subagents.
@@ -112,6 +122,26 @@ oracle
 ```
 
 `context-builder` and `delegate` are intentionally disabled. The reviewer should have `read`, `grep`, `find`, `ls`, and `bash`, but no `edit` or `write`. The researcher should use fresh context, Sonnet 4.6, and only `web_search`, `fetch_content`, and `get_search_content`.
+
+## Google Drive uploads
+
+The Pi adapter installs the reviewed `gws-shared` and `gws-drive-upload` skills from Google Workspace CLI `0.22.5`; see the vendored [`UPSTREAM.md`](skills/UPSTREAM.md) for provenance and integration notes. Install the CLI separately, then authenticate it with Drive-only access:
+
+```sh
+brew install googleworkspace-cli
+# or: npm install -g @googleworkspace/cli
+
+gws auth setup
+gws auth login --scopes https://www.googleapis.com/auth/drive
+```
+
+OAuth setup may create or modify a Google Cloud project and opens a browser for consent. Keep generated credentials out of this repository. Version 0.22.5 encrypts its saved OAuth credentials and token cache under `~/.config/gws`; generated client configuration can still contain sensitive plaintext. The CLI does not prompt before uploading—the vendored skill requires Pi to obtain user confirmation before invoking the write command.
+
+After authentication, restart Pi or run `/reload`, then ask Pi to upload a file. A direct smoke test is:
+
+```sh
+gws drive files list --params '{"pageSize": 1, "fields": "files(id,name)"}'
+```
 
 ## Web research configuration
 
