@@ -32,6 +32,10 @@ Do not perform broad rewrites, speculative cleanup, or dependency upgrades unles
 - Comments should explain intent, constraints, or non-obvious decisions—not restate the code.
 - Do not bypass type checking, linting, tests, or security controls merely to make a check pass.
 
+## Python
+
+- Prefer `uv` for Python version management, virtual environments, dependency changes, lockfiles, and project commands unless the repository explicitly uses another tool.
+
 ## Evidence and Learning
 
 - Treat material explanations as scoped claims; distinguish requirements, source claims, observations, inference, and preferences.
@@ -59,15 +63,29 @@ Do not perform broad rewrites, speculative cleanup, or dependency upgrades unles
 - Ask before destructive or externally visible actions such as deleting data, deploying, publishing, pushing, or changing remote infrastructure.
 - Do not weaken security settings or evade machine and organizational policy.
 
-## Git
+## Version Control
 
-- Never discard uncommitted changes without explicit permission.
-- Do not rewrite history, force-push, commit, or push unless requested.
-- Keep changes focused and reviewable.
-- When asked to commit, use the repository's commit convention; otherwise use a concise imperative message.
+- Detect the repository's existing version-control system and use its native CLI; do not initialize, convert, or colocate a repository unless requested.
+- Inspect status and diffs before editing and before finalizing meaningful changes. Preserve unrelated and user-authored work.
+- In Jujutsu repositories, keep agent edits in the active working-copy change by default so the user can review them with `jj diff`.
+- Prefer `jj split` over proactively creating changes with `jj new` when completed work needs separation. Use filesets for unambiguous splits; leave interactive hunk selection to the user unless explicitly requested. Before splitting a bookmarked change, report that `jj split` may move the bookmark to the remaining child change.
+- Do not run `jj new`, `jj squash`, `jj abandon`, explicitly move bookmarks, or push unless requested. Treat colocated repositories as Jujutsu-first unless project instructions say otherwise.
+- In Git repositories, local commits are allowed when they form a coherent, reviewable unit and relevant verification has succeeded.
+- Never include unrelated changes in an agent-created commit. Follow the repository's commit convention; otherwise use a concise imperative message.
+- Never push, force-push, rewrite published history, or discard changes unless requested. In Git repositories, do not amend, rebase, reset, or otherwise rewrite existing history unless requested.
+- Use lazygit only when the user prefers it and it is available; otherwise present native diffs for review.
+
+## Search and Navigation
+
+- Prefer `rg` for repository text and symbol searches when available.
+- Use `find` for filesystem discovery.
+- Start with narrow searches and expand only when needed; avoid unnecessarily large outputs.
+- Use syntax-aware search or an available language server when semantic accuracy is important and the repository already supports it.
+- Do not add indexing services or search dependencies without a demonstrated need.
 
 ## Tool Use
 
+- For personal agent configuration changes, edit the canonical `~/Codes/_agent` repository—not installed adapter paths such as `~/.pi/agent`; use the repository installer to manage links.
 - Prefer precise file-reading and editing tools over ad hoc shell transformations.
 - Use non-interactive commands where possible.
 - Avoid commands that modify files outside the task scope.
