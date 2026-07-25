@@ -32,6 +32,12 @@ Do not perform broad rewrites, speculative cleanup, or dependency upgrades unles
 - Comments should explain intent, constraints, or non-obvious decisions—not restate the code.
 - Do not bypass type checking, linting, tests, or security controls merely to make a check pass.
 
+## Evidence and Learning
+
+- Treat material explanations as scoped claims; distinguish requirements, source claims, observations, inference, and preferences.
+- Verify consequential behavior with relevant code, tests, or controlled execution when practical, and preserve evidence that challenges the initial assumption.
+- Use the `evidence-learning-loop` skill for non-trivial work involving uncertainty, experiments, conflicting evidence, evolving systems, or reusable learning; keep mechanical tasks lightweight.
+
 ## Verification
 
 - Discover project commands from repository documentation and configuration rather than guessing.

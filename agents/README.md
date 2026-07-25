@@ -7,6 +7,7 @@ This directory is a navigation point for agent-role configuration. Executable ro
 - [Agent role user guide](USER_GUIDE.md) — use the roles currently available in this repository.
 - [Agent role design guide](agent-role-design-guide.md) — design or customize bounded agent definitions.
 - [Agent runtime engineering guide](agent-runtime-engineering-guide.md) — build the harness that resolves and supervises agent executions.
+- [Evidence-backed document update loop](evidence-backed-document-update-loop.md) — update internal design documents with verified evidence, bounded autonomy, and exception-driven human escalation.
 
 ## Pi
 

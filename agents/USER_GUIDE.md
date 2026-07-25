@@ -69,6 +69,30 @@ The parent should first inspect local dependency metadata, then send only a sani
 
 Explicit tool or command syntax may remain useful for automation, but it is an adapter detail. Do not encode Pi-specific invocation syntax into portable role contracts unless a workflow genuinely requires it.
 
+## Evidence learning across roles
+
+For non-trivial work involving uncertainty, experiments, conflicting sources, evolving systems, or an explicit learning goal, the primary agent should load the shared `evidence-learning-loop` skill. The skill treats research, implementation, tests, and review as evidence in one claim lifecycle rather than treating research summaries as final truth.
+
+Use the lightest useful level:
+
+- **Evidence hygiene:** always distinguish claims from observations and verify material behavior.
+- **Task learning:** track assumptions, predictions, discoveries, tests, and claim transitions for substantial work.
+- **Durable knowledge:** persist a reviewed knowledge packet only when reuse is likely and the destination is authorized.
+- **Knowledge portfolio:** introduce separate curation only after cross-task ownership, staleness, or context pressure becomes a demonstrated need.
+
+Each role contributes at its natural boundary:
+
+| Role | Evidence-learning contribution |
+|---|---|
+| `scout` | Observations, candidate claims, contradictions, source locations, and unknowns |
+| `researcher` | Canonical ownership, source claims, current/intended/legacy distinctions, freshness, and testable predictions |
+| `planner` | Material assumptions, predictions, verification steps, and failure interpretations |
+| `worker` | Expected versus actual behavior, experiments, discoveries, challenged claims, and counterexamples |
+| `reviewer` | Unsupported explanations, weak tests, missing counterexamples, and overgeneralization |
+| Primary | Claim-state integration, persistence decisions, and consequential escalation |
+
+Child agents may not inherit skills or parent context consistently across harnesses. Delegation tasks should therefore include the relevant checkpoint output instead of only saying “use the skill.” Keep typo fixes, formatting, exact text replacements, and other mechanical work lightweight.
+
 ## Recommended workflows
 
 ### Small change
