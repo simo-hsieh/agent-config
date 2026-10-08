@@ -127,9 +127,6 @@ install_shared_docs
 
 if want claude; then
   copy_item "$ROOT/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-  if [ "$WITH_SETTINGS" -eq 1 ]; then
-    copy_item "$ROOT/claude/settings.json" "$HOME/.claude/settings.json"
-  fi
   install_tool_skills "$HOME/.claude/skills"
   make_dir "$HOME/.claude/agents"
   for agent in "$ROOT"/claude/agents/*.md; do

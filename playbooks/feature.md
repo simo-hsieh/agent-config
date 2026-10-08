@@ -23,4 +23,4 @@ Each artifact lives in the target project (for example `docs/<topic>/`), is comm
 5. **Feedback:** when code reveals that the design or intent is wrong, stop, update `design.md` (or `intent.md`) in the same change, and return it for approval rather than silently diverging.
 6. **Report:** what changed, how it was checked, how the diff maps to R#, open risks.
 
-Use `scout` or `researcher` for wide evidence only. Bugfixes and investigations skip this flow.
+Use `researcher` for external evidence only. Bugfixes and investigations skip this flow.

@@ -4,10 +4,10 @@ Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md
 
 ```text
 AGENTS.md      always-on defaults: communication, scope, playbook routing, delegation, safety
-rules/         coding, debugging, vcs — read by the agent when the task calls for them
-playbooks/     bugfix, investigation, feature, skill-agent-change
-skills/        code-review, verify-changes, evidence-learning-loop, auto-research
-claude/        subagents (scout, researcher, worker, reviewer) and settings.json
+rules/         coding — read by the agent before writing code
+playbooks/     bugfix, feature (intent <-> design <-> code)
+skills/        code-review, evidence-learning-loop, auto-research
+claude/        researcher subagent
 pi/            subagent definitions, settings.json, runtime limits
 install.sh     idempotent copy installer
 ```
@@ -19,7 +19,7 @@ Project-specific commands and conventions belong in each project's own `AGENTS.m
 ```sh
 ./install.sh --dry-run          # preview
 ./install.sh claude pi          # selected adapters (default: all)
-./install.sh --with-settings claude pi
+./install.sh --with-settings pi
 ```
 
 The installer copies files (never symlinks), backs up anything it replaces under `${XDG_STATE_HOME:-~/.local/state}/agent-config-installer/backups/`, and never deletes. Files removed from this repo stay installed until you remove them by hand.
@@ -37,7 +37,7 @@ Settings are opt-in (`--with-settings`) because replacing them can disable local
 
 - **Main thinking model:** Claude Opus 5.5 (`anthropic/claude-opus-5-5`), used for design, review, and research.
 - **Main non-thinking model:** GPT-5.6 Sol (`openai-codex/gpt-5.6-sol`), the Pi default with thinking off, and the Pi `worker`.
-- **Backup:** Claude Sonnet 5.5. Claude Code's `scout` uses it. Pi's model catalog (0.85) does not list it yet, so Pi has no pinned backup; update Pi, then set `anthropic/claude-sonnet-5-5`.
+- **Backup:** Claude Sonnet 5.5. Pi's model catalog (0.85) does not list it yet, so Pi has no pinned backup; update Pi, then set `anthropic/claude-sonnet-5-5`.
 
 Claude Code subagents otherwise inherit the session model.
 

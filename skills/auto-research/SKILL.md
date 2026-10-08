@@ -11,7 +11,7 @@ Split the request into questions, route each by type, and merge the answers into
 
 | Question type | Handled by |
 |---|---|
-| Where/how in this codebase | `scout` or direct search |
+| Where/how in this codebase | direct search |
 | External web, papers, vendor docs | `researcher` |
 
 Send each leaf only its own part of the question. When one answer depends on another, run them in order and pass the first result on. Run independent questions in parallel.
