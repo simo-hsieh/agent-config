@@ -33,6 +33,14 @@ The installer copies files (never symlinks), backs up anything it replaces under
 
 Settings are opt-in (`--with-settings`) because replacing them can disable local hooks or permissions. Restart agent sessions after installing.
 
+## Models
+
+- **Main thinking model:** Claude Opus 5.5 (`anthropic/claude-opus-5-5`), used for design, review, and research.
+- **Main non-thinking model:** GPT-5.6 Sol (`openai-codex/gpt-5.6-sol`), the Pi default with thinking off, and the Pi `worker`.
+- **Backup:** Claude Sonnet 5.5. Claude Code's `scout` uses it. Pi's model catalog (0.85) does not list it yet, so Pi has no pinned backup; update Pi, then set `anthropic/claude-sonnet-5-5`.
+
+Claude Code subagents otherwise inherit the session model.
+
 ## Editing
 
 Edit here, never the installed copies. Keep every line behavior-changing: no emphasis words, no duplicated rules, no instructions the model follows by default. Review config changes like code; a global instruction affects every repository.

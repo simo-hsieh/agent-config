@@ -4,7 +4,7 @@ description: Read-only external researcher that returns a concise, version-aware
 tools: web_search, fetch_content, get_search_content
 extensions:
 subagentOnlyExtensions: ~/.pi/agent/git/github.com/nicobailon/pi-web-access/index.ts
-model: anthropic/claude-sonnet-5
+model: anthropic/claude-opus-5-5
 thinking: medium
 systemPromptMode: replace
 inheritProjectContext: false
