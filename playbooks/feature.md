@@ -1,8 +1,26 @@
 # Playbook: feature
 
-For new behavior, a new interface, a cross-module change, or when a design doc is the deliverable.
+For new behavior, a new interface, a cross-module change, or when a design doc is the deliverable. Based on Anthropic's AI-native SDLC playbook, collapsed to the loop:
 
-1. **Context.** Read the code yourself. Use `scout` or `researcher` only when the evidence is wide (many modules, external APIs).
-2. **Plan.** Write a short inline plan: approach, risks, and alternatives only when a real trade-off exists. For a design doc, keep it decision-focused: objective, design, alternatives with rejection reasons, risks. Wait for approval on a design doc or a change that touches more than a few files.
-3. **Implement.** Red-green per step, inline or via `worker` for a bounded step. Update tests as behavior changes.
-4. **Report.** What changed, how it was checked, open risks.
+```text
+intent.md <-> design.md <-> code + tests
+   ^                           |
+   +------ observed feedback --+
+```
+
+Each artifact lives in the target project (for example `docs/<topic>/`), is committed, and is approved by a human before the next step. Write only the artifacts that reduce risk: a small, local, reversible change goes straight from a stated intent to code and tests.
+
+1. **Intent** (`intent.md`): problem, desired outcome, affected users and systems, constraints, open questions, in the requester's words. Ask probing questions about scope and success criteria, then wait for acceptance.
+2. **Design** (`design.md`), written for engineers who know the system; skip trivial background:
+   - numbered requirements (R1, R2, ...) that satisfy the intent;
+   - the approach and key decisions, with alternatives and why they were rejected when a real trade-off exists;
+   - how each intent constraint is satisfied, open questions, and flagged concerns (security, compatibility, migration) with an owner each;
+   - diagrams as Mermaid in the markdown.
+
+   Resolve flagged concerns, then wait for acceptance. Raise the reviewer bar for risky or hard-to-reverse designs.
+3. **Plan** (inline, or `plan.md` for larger work), in read-only mode before any edit: files affected, ordered steps, risks, and the test that proves each R#. The engineer corrects it before code is written.
+4. **Code and tests:** red-green per step, citing R# in test names or commit messages. Do not edit a failing test to make it pass.
+5. **Feedback:** when code reveals that the design or intent is wrong, stop, update `design.md` (or `intent.md`) in the same change, and return it for approval rather than silently diverging.
+6. **Report:** what changed, how it was checked, how the diff maps to R#, open risks.
+
+Use `scout` or `researcher` for wide evidence only. Bugfixes and investigations skip this flow.
