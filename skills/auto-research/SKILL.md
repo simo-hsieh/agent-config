@@ -31,4 +31,4 @@ Send each leaf only its own part of the question. When one answer depends on ano
 
 ## Report
 
-List findings with sources (`file:line`, URL with access date), mark what is UNVERIFIED, and list open questions. Send empirical checks (scratch repros, benchmarks, test runs) to `worker` instead of guessing.
+List findings with sources (`file:line`, URL, with access date when supplied), mark what is UNVERIFIED, and list open questions. Send empirical checks (scratch repros, benchmarks, test runs) to `worker` instead of guessing.

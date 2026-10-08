@@ -26,4 +26,4 @@ Do not treat intended design as proof of current behavior, or a hypothesis as a 
 
 ## Keep what is reusable
 
-Persist a lesson only when it is likely to be reused: put it in this repo's rules or the project's docs with its scope, revision, and last-checked date. Keep raw transcripts, credentials, and customer data out. When the same mistake repeats, turn the correction into a rule, a skill, or a deterministic check.
+Persist a lesson only when it is likely to be reused: put it in `~/code/_agent/rules/` or the project's docs with its scope, revision, and last-checked date. Keep raw transcripts, credentials, and customer data out. When the same mistake repeats, turn the correction into a rule, a skill, or a deterministic check.
