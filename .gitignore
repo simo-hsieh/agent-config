@@ -1,5 +1,4 @@
 # Machine-local permissions and overrides
-claude/settings.local.json
 *.local.json
 
 # Secrets and temporary files

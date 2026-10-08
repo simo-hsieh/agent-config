@@ -19,7 +19,7 @@ Each artifact lives in the target project (for example `docs/<topic>/`), is comm
 
    Resolve flagged concerns, then wait for acceptance. Raise the reviewer bar for risky or hard-to-reverse designs.
 3. **Plan** (inline, or `plan.md` for larger work), in read-only mode before any edit: files affected, ordered steps, risks, and the test that proves each R#. The engineer corrects it before code is written.
-4. **Code and tests:** red-green per step, citing R# in test names or commit messages. Do not edit a failing test to make it pass.
+4. **Code and tests:** red-green per step, citing R# in test names or commit messages.
 5. **Feedback:** when code reveals that the design or intent is wrong, stop, update `design.md` (or `intent.md`) in the same change, and return it for approval rather than silently diverging.
 6. **Report:** what changed, how it was checked, how the diff maps to R#, open risks.
 

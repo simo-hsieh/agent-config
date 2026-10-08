@@ -7,7 +7,7 @@ AGENTS.md      always-on defaults: communication, scope, playbook routing, deleg
 rules/         coding — read by the agent before writing code
 playbooks/     bugfix, feature (intent <-> design <-> code)
 skills/        code-review, evidence-learning-loop, auto-research
-claude/        researcher subagent
+claude/        researcher and worker subagents
 pi/            subagent definitions, settings.json, runtime limits
 install.sh     idempotent copy installer
 ```
@@ -35,11 +35,10 @@ Settings are opt-in (`--with-settings`) because replacing them can disable local
 
 ## Models
 
-- **Main thinking model:** Claude Opus 5.5 (`anthropic/claude-opus-5-5`), used for design, review, and research.
+- **Main thinking model:** Claude Opus 5.5 (`anthropic/claude-opus-5-5`), used for design and review.
 - **Main non-thinking model:** GPT-5.6 Sol (`openai-codex/gpt-5.6-sol`), the Pi default with thinking off, and the Pi `worker`.
 - **Backup:** Claude Sonnet 5.5. Pi's model catalog (0.85) does not list it yet, so Pi has no pinned backup; update Pi, then set `anthropic/claude-sonnet-5-5`.
-
-Claude Code subagents otherwise inherit the session model.
+- **Claude Code:** the session runs Opus 5.5; `researcher` and `worker` run Sonnet 5.5.
 
 ## Editing
 

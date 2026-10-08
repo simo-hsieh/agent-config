@@ -24,14 +24,14 @@ Pick the first that fits and name it on the first line of your reply (`Playbook:
 | `bugfix` | a failing test, crash, wrong behavior, or small behavior-preserving refactor: read `~/.agents/playbooks/bugfix.md` |
 | `feature` | new behavior, a new interface, a cross-module change, or a design doc: read `~/.agents/playbooks/feature.md` |
 | `investigation` | a question about code, or an unclear request: answer inline, no edits, cite `file:line`, mark unproven claims UNVERIFIED |
-| `config-change` | editing a skill, agent, rule, playbook, or this file: edit the source in `~/code/_agent`, change one line before adding one, keep every line behavior-changing, then run `./install.sh --dry-run` |
+| `config-change` | editing a skill, agent, rule, playbook, or this file: edit the source in `~/code/_agent`, never the installed copies, change one line before adding one, keep every line behavior-changing, then run `./install.sh --dry-run` |
 
 Read `~/.agents/rules/coding.md` before writing code.
 
 ## Debugging and loops
 
 - After two consecutive failures of the same command, stop and find the root cause (read the real error, inspect inputs and state) before retrying. After five failed fixes, stop and tell the user what you tried and suspect.
-- Fix root causes, not symptoms; never weaken a test to make it pass.
+- Fix root causes, not symptoms.
 
 ## Version control
 
@@ -41,7 +41,7 @@ Read `~/.agents/rules/coding.md` before writing code.
 ## Delegation
 
 - Work directly when you can finish in a handful of tool calls. Run independent reads and searches in parallel.
-- Delegate only large, independent, parallelizable work, and use one subagent rather than several. Use `researcher` for external, cited research. Never use a subagent to double-check your own work.
+- Delegate only large, independent, parallelizable work, and use one subagent rather than several. Use `researcher` for external, cited research and `worker` for well-specified mechanical work or empirical checks. Never use a subagent to double-check your own work.
 
 ## Safety
 
@@ -53,4 +53,3 @@ Read `~/.agents/rules/coding.md` before writing code.
 
 - Discover project commands from repository docs and config rather than guessing. Python: prefer `uv`.
 - Work local-first. Use web research only when freshness or missing knowledge matters, send only sanitized public context, prefer primary sources, and cite them.
-- Personal agent configuration lives in `~/code/_agent`; edit it there and run `install.sh`, never the installed copies.

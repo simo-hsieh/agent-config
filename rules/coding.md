@@ -7,7 +7,6 @@ Read before writing or reviewing code. Project conventions override these.
 - Edit existing functions and classes directly. Add adapters, factories, or DTOs only when several callers need them.
 - Keep logic pure and I/O (file, network, DB, RPC, UI) in thin outer layers; the core never imports the shell. This keeps tests free of mocks.
 - One authoritative owner per piece of state. Compute derived state instead of caching a mirror.
-- Prefer simple, readable code over clever abstraction. Do not add speculative generality.
 
 ## Naming and layout
 
