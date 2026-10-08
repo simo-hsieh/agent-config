@@ -35,8 +35,9 @@ Read `~/.agents/rules/coding.md` before writing code.
 
 ## Version control
 
-- Use the repository's own VCS; never initialize or convert one. In jj repos, leave edits in the working-copy change and do not run `jj new`, `squash`, `abandon`, move bookmarks, or push unless asked. In git repos, local commits are fine when coherent and checked; never push, amend, rebase, reset, or discard unless asked.
-- One logical change per commit, concise imperative message, no unrelated changes.
+- Use the repository's own VCS; never initialize or convert one. In jj repos, load the `jj` skill before editing or organizing changes; split and squash local task-owned work into coherent, up-to-date topics rather than accumulating follow-up commits. In git repos, local commits are fine when coherent and checked; never push, amend, rebase, reset, or discard unless asked.
+- In jj, keep independent topics as siblings, stack only real dependencies, and describe each change's intent, design, and contents. Preserve unrelated work; ask before rewriting shared changes, moving bookmarks, or pushing.
+- One logical topic per change; its description must match its current contents, not the sequence of edits.
 
 ## Delegation
 
