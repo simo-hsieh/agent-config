@@ -41,7 +41,7 @@ Read `~/.agents/rules/coding.md` before writing code.
 ## Delegation
 
 - Work directly when you can finish in a handful of tool calls. Run independent reads and searches in parallel.
-- Delegate only large, independent, parallelizable work, and use one subagent rather than several. Use `researcher` for external, cited research and `worker` for well-specified mechanical work or empirical checks. Never use a subagent to double-check your own work.
+- Delegate only large, independent, parallelizable work, and use one subagent rather than several unless a skill or the delegating prompt says otherwise. Use `researcher` for external, cited research and `worker` for well-specified mechanical work or empirical checks; in Claude Code inside Herdr, run both in Pi with the `pi-delegate` skill and keep design and review in the main session. Never use a subagent to double-check your own work.
 
 ## Safety
 

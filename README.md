@@ -6,8 +6,8 @@ Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md
 AGENTS.md      always-on defaults: communication, scope, playbook routing, delegation, safety
 rules/         coding — read by the agent before writing code
 playbooks/     bugfix, feature (intent <-> design <-> code)
-skills/        code-review, evidence-learning-loop, auto-research
-claude/        researcher and worker subagents
+skills/        jj, code-review, evidence-learning-loop, auto-research, pi-delegate, agent-browser, notion-mcp
+claude/        researcher and worker subagents (fallback outside Herdr)
 pi/            subagent definitions, settings.json, runtime limits
 install.sh     idempotent copy installer
 ```
@@ -26,7 +26,7 @@ The installer copies files (never symlinks), backs up anything it replaces under
 
 | Source | Installed to |
 |---|---|
-| `skills/*`, `rules/*`, `playbooks/*` | `~/.agents/` (and each tool's `skills/` dir) |
+| `skills/*`, `rules/*`, `playbooks/*` | `~/.agents/` (skills also to `~/.claude/skills/`; Pi reads `~/.agents/skills`) |
 | `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md` |
 | `claude/agents/*.md` | `~/.claude/agents/` |
 | `pi/agents/*.md`, `pi/subagents.json` | `~/.pi/agent/agents/`, `~/.pi/agent/extensions/subagent/config.json` |
@@ -35,10 +35,23 @@ Settings are opt-in (`--with-settings`) because replacing them can disable local
 
 ## Models
 
-- **Main thinking model:** Claude Opus 5.5 (`anthropic/claude-opus-5-5`), used for design and review.
-- **Main non-thinking model:** GPT-5.6 Sol (`openai-codex/gpt-5.6-sol`), the Pi default with thinking off, and the Pi `worker`.
-- **Backup:** Claude Sonnet 5.5. Pi's model catalog (0.85) does not list it yet, so Pi has no pinned backup; update Pi, then set `anthropic/claude-sonnet-5-5`.
-- **Claude Code:** the session runs Opus 5.5; `researcher` and `worker` run Sonnet 5.5.
+- **Orchestrator and thinker:** Claude Opus 5.5 at `medium` effort in Claude Code, for planning, design, review, and final judgment; set the effort in your own Claude Code settings. Opus is not allowed in Pi.
+- **Other roles:** Pi on GPT-6.1 Sol (`openai-codex/gpt-6.1-sol`, thinking `medium`; `scout` keeps `low`), started by Claude Code in Herdr tabs through the `pi-delegate` skill as `researcher` and `worker`. A task that fails twice is retried at `xhigh`, then taken over by Opus.
+- **Backup:** outside Herdr or when Pi hits its quota, Opus does small tasks itself and the Claude Code subagents take larger ones: `worker` on Sonnet 5.5 `high`, `researcher` on Sonnet 5.5 `medium`. Pi has no automatic fallback; pi-subagents 0.76 removed `fallbackModels`.
+- **Last resort, manual:** when Claude usage is also exhausted, run Pi or Gemini CLI on Gemini 4 Argon (`high`) yourself. No Google provider is configured here.
+- **Why:** on the Artificial Analysis Coding Agent Index (October 2026), GPT-6.1 Sol `medium` scores 61 at $0.70 and 11 minutes per task, against 55 at $1.24 and 12 minutes for Sonnet 5.5 `high`, 55 at $6.35 for GPT-5.6 Sol `max` (the previous Pi model), 63 at $3.33 and 27 minutes for Sonnet 5.5 `xhigh`, and 64 at $5.84 and 35 minutes for Gemini 4 Argon. Haiku 5.5 scores at most 41 and is not used.
+
+```mermaid
+flowchart LR
+  CC["Claude Code<br/>Opus 5.5<br/>orchestrate, design, review"]
+  CC -->|"HERDR_ENV=1<br/>pi-delegate skill"| HT["Herdr tab per role"]
+  HT --> PI["Pi main session<br/>GPT-6.1 Sol"]
+  PI --> PR["researcher subagent<br/>web tools only"]
+  PI --> PW["worker subagent"]
+  CC -->|"outside Herdr<br/>or Pi quota hit"| CS["Claude subagents<br/>researcher, worker<br/>Sonnet 5.5"]
+  PI -. "status: DONE / BLOCKED / FAILED<br/>summary + report path" .-> CC
+  CS -. "status line + report" .-> CC
+```
 
 ## Editing
 
