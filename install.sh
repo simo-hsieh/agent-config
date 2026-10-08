@@ -53,7 +53,7 @@ items_match() {
   if [ -f "$src" ] && [ -f "$dst" ]; then
     cmp -s "$src" "$dst"
   elif [ -d "$src" ] && [ -d "$dst" ]; then
-    diff -qr "$src" "$dst" >/dev/null 2>&1
+    diff -qr -x .DS_Store "$src" "$dst" >/dev/null 2>&1
   else
     return 1
   fi
@@ -89,6 +89,7 @@ copy_item() {
   if [ "$DRY_RUN" -ne 1 ]; then
     if [ -d "$src" ]; then
       cp -Rp "$src" "$dst"
+      find "$dst" -name .DS_Store -type f -exec rm -f {} +
     else
       cp -p "$src" "$dst"
     fi
