@@ -10,7 +10,7 @@ BACKUP_ROOT=${XDG_STATE_HOME:-$HOME/.local/state}/agent-config-installer/backups
 
 usage() {
   cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi] [codex] [antigravity]
+Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi]
 
 With no component arguments, installs all supported adapters.
 Settings are opt-in because replacing a harness configuration can disable local
@@ -24,7 +24,7 @@ for arg in "$@"; do
     --dry-run) DRY_RUN=1 ;;
     --with-settings) WITH_SETTINGS=1 ;;
     -h|--help) usage; exit 0 ;;
-    claude|pi|codex|antigravity) SELECTED="$SELECTED $arg " ;;
+    claude|pi) SELECTED="$SELECTED $arg " ;;
     *) echo "Unknown argument: $arg" >&2; usage >&2; exit 2 ;;
   esac
 done
@@ -149,23 +149,6 @@ if want pi; then
     copy_item "$agent" "$HOME/.pi/agent/agents/${agent##*/}"
   done
   copy_item "$ROOT/pi/subagents.json" "$HOME/.pi/agent/extensions/subagent/config.json"
-fi
-
-if want codex; then
-  copy_item "$ROOT/AGENTS.md" "$HOME/.codex/AGENTS.md"
-  install_tool_skills "$HOME/.codex/skills"
-fi
-
-if want antigravity; then
-  copy_item "$ROOT/AGENTS.md" "$HOME/.gemini/config/AGENTS.md"
-  install_tool_skills "$HOME/.gemini/config/skills"
-  make_dir "$HOME/.gemini/config/agents"
-  for agent_dir in "$ROOT"/antigravity/agents/*; do
-    [ -d "$agent_dir" ] || continue
-    name=${agent_dir##*/}
-    make_dir "$HOME/.gemini/config/agents/$name"
-    copy_item "$agent_dir/agent.md" "$HOME/.gemini/config/agents/$name/agent.md"
-  done
 fi
 
 note "Done. Restart active agent sessions to reload configuration."

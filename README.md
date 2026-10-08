@@ -1,6 +1,6 @@
 # Personal agent configuration
 
-Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md` is the always-on instruction file; everything else loads on demand. Claude Code, Pi, Codex, and Antigravity are thin adapters.
+Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md` is the always-on instruction file; everything else loads on demand. Claude Code and Pi are thin adapters.
 
 ```text
 AGENTS.md      always-on defaults: communication, scope, playbook routing, delegation, safety
@@ -9,8 +9,6 @@ playbooks/     bugfix, investigation, feature, skill-agent-change
 skills/        code-review, verify-changes, evidence-learning-loop, auto-research
 claude/        subagents (scout, researcher, worker, reviewer) and settings.json
 pi/            subagent definitions, settings.json, runtime limits
-codex/         Codex notes
-antigravity/   subagents (scout, worker, reviewer)
 install.sh     idempotent copy installer
 ```
 
@@ -29,10 +27,9 @@ The installer copies files (never symlinks), backs up anything it replaces under
 | Source | Installed to |
 |---|---|
 | `skills/*`, `rules/*`, `playbooks/*` | `~/.agents/` (and each tool's `skills/` dir) |
-| `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md`, `~/.codex/AGENTS.md`, `~/.gemini/config/AGENTS.md` |
+| `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md` |
 | `claude/agents/*.md` | `~/.claude/agents/` |
 | `pi/agents/*.md`, `pi/subagents.json` | `~/.pi/agent/agents/`, `~/.pi/agent/extensions/subagent/config.json` |
-| `antigravity/agents/*` | `~/.gemini/config/agents/` |
 
 Settings are opt-in (`--with-settings`) because replacing them can disable local hooks or permissions. Restart agent sessions after installing.
 
