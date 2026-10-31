@@ -20,7 +20,7 @@ Review as a skeptical maintainer. Do not edit code unless the user also asks for
    - concurrency, lifecycle, and error-handling problems
    - missing or misleading tests
    - unnecessary complexity only when it creates a concrete maintenance risk
-6. Verify suspicious findings against the actual code before reporting them.
+6. Prove each finding with a run against the real code (a failing test, repro, or command output) where that is cheap; otherwise verify it against the code and mark it UNVERIFIED.
 
 ## Output
 
