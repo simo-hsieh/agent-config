@@ -10,7 +10,7 @@ Build evidence that the current change works without hiding failures or modifyin
 ## Process
 
 1. Read repository instructions and inspect package/build configuration to discover supported commands.
-2. Inspect the diff for accidental edits, debug output, generated artifacts, secrets, and incomplete work.
+2. Inspect the diff for accidental edits, debug output, generated artifacts, secrets, incomplete work, and unexplained departures from any applicable `intent.md`, `spec.md`, or `plan.md`.
 3. Run the narrowest relevant tests first.
 4. Run applicable type checking, linting, formatting checks, or builds.
 5. Expand to broader tests when the change has wide impact and the cost is reasonable.
@@ -25,6 +25,7 @@ Provide:
 - each command run and whether it passed
 - failures with the important error and likely cause
 - checks not run and why
+- whether the final diff matches the stated request or available intent/spec/plan artifacts
 - residual risks or areas requiring manual verification
 
 Never describe a result as verified when the relevant command was not run.

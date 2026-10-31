@@ -10,16 +10,17 @@ Review as a skeptical maintainer. Do not edit code unless the user also asks for
 ## Process
 
 1. Identify the review target and its intended behavior.
-2. Read repository instructions and the surrounding code needed to understand invariants and call sites.
+2. Read repository instructions, any project `REVIEW.md`, and the surrounding code needed to understand invariants and call sites.
 3. Inspect the complete relevant diff; do not infer the change from filenames alone.
-4. Check for:
+4. When `intent.md`, `spec.md`, `plan.md`, an issue, or a user request defines the expected behavior, check the change against that artifact.
+5. Check for:
    - incorrect behavior and edge cases
    - regressions and compatibility breaks
    - security, privacy, and unsafe input handling
    - concurrency, lifecycle, and error-handling problems
    - missing or misleading tests
    - unnecessary complexity only when it creates a concrete maintenance risk
-5. Verify suspicious findings against the actual code before reporting them.
+6. Verify suspicious findings against the actual code before reporting them.
 
 ## Output
 

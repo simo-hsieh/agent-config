@@ -6,6 +6,7 @@ DRY_RUN=0
 WITH_SETTINGS=0
 SELECTED=""
 STAMP=$(date +%Y%m%d-%H%M%S)
+BACKUP_ROOT=${XDG_STATE_HOME:-$HOME/.local/state}/agent-config-installer/backups/$STAMP-$$
 
 usage() {
   cat <<'EOF'
@@ -13,7 +14,8 @@ Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi] [codex] [antigra
 
 With no component arguments, installs all supported adapters.
 Settings are opt-in because replacing a harness configuration can disable local
-hooks or permissions. Existing files are backed up; they are never deleted.
+hooks or permissions. Existing files are backed up outside harness discovery
+directories; they are never deleted.
 EOF
 }
 
@@ -41,32 +43,73 @@ make_dir() {
   [ "$DRY_RUN" -eq 1 ] || mkdir -p "$1"
 }
 
-link_item() {
+items_match() {
+  src=$1
+  dst=$2
+
+  # Existing symlinks must be replaced even when they currently resolve to the
+  # same content, otherwise later working-tree edits remain globally active.
+  [ ! -L "$dst" ] || return 1
+  if [ -f "$src" ] && [ -f "$dst" ]; then
+    cmp -s "$src" "$dst"
+  elif [ -d "$src" ] && [ -d "$dst" ]; then
+    diff -qr "$src" "$dst" >/dev/null 2>&1
+  else
+    return 1
+  fi
+}
+
+copy_item() {
   src=$1
   dst=$2
   parent=${dst%/*}
   make_dir "$parent"
 
-  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
+  if items_match "$src" "$dst"; then
     note "ok     $dst"
     return 0
   fi
 
   if [ -e "$dst" ] || [ -L "$dst" ]; then
-    backup="$dst.backup-$STAMP-$$"
+    case "$dst" in
+      "$HOME"/*) relative=${dst#"$HOME"/} ;;
+      *) echo "Refusing to back up destination outside HOME: $dst" >&2; exit 2 ;;
+    esac
+    backup="$BACKUP_ROOT/$relative"
+    backup_parent=${backup%/*}
+    make_dir "$backup_parent"
+    while [ -e "$backup" ] || [ -L "$backup" ]; do
+      backup="$backup-next"
+    done
     note "backup $dst -> $backup"
     [ "$DRY_RUN" -eq 1 ] || mv "$dst" "$backup"
   fi
 
-  note "link   $dst -> $src"
-  [ "$DRY_RUN" -eq 1 ] || ln -s "$src" "$dst"
+  note "copy   $src -> $dst"
+  if [ "$DRY_RUN" -ne 1 ]; then
+    if [ -d "$src" ]; then
+      cp -Rp "$src" "$dst"
+    else
+      cp -p "$src" "$dst"
+    fi
+  fi
 }
 
 install_shared_skills() {
   make_dir "$HOME/.agents/skills"
   for skill in "$ROOT"/skills/*; do
     [ -d "$skill" ] || continue
-    link_item "$skill" "$HOME/.agents/skills/${skill##*/}"
+    copy_item "$skill" "$HOME/.agents/skills/${skill##*/}"
+  done
+}
+
+install_shared_docs() {
+  for dir in rules playbooks; do
+    make_dir "$HOME/.agents/$dir"
+    for doc in "$ROOT/$dir"/*.md; do
+      [ -f "$doc" ] || continue
+      copy_item "$doc" "$HOME/.agents/$dir/${doc##*/}"
+    done
   done
 }
 
@@ -75,62 +118,53 @@ install_tool_skills() {
   make_dir "$tool_dir"
   for skill in "$ROOT"/skills/*; do
     [ -d "$skill" ] || continue
-    link_item "$skill" "$tool_dir/${skill##*/}"
+    copy_item "$skill" "$tool_dir/${skill##*/}"
   done
 }
 
 install_shared_skills
+install_shared_docs
 
 if want claude; then
-  link_item "$ROOT/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+  copy_item "$ROOT/AGENTS.md" "$HOME/.claude/CLAUDE.md"
   if [ "$WITH_SETTINGS" -eq 1 ]; then
-    link_item "$ROOT/claude/settings.json" "$HOME/.claude/settings.json"
+    copy_item "$ROOT/claude/settings.json" "$HOME/.claude/settings.json"
   fi
   install_tool_skills "$HOME/.claude/skills"
   make_dir "$HOME/.claude/agents"
   for agent in "$ROOT"/claude/agents/*.md; do
     [ -f "$agent" ] || continue
-    link_item "$agent" "$HOME/.claude/agents/${agent##*/}"
+    copy_item "$agent" "$HOME/.claude/agents/${agent##*/}"
   done
 fi
 
 if want pi; then
-  link_item "$ROOT/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
+  copy_item "$ROOT/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
   if [ "$WITH_SETTINGS" -eq 1 ]; then
-    link_item "$ROOT/pi/settings.json" "$HOME/.pi/agent/settings.json"
+    copy_item "$ROOT/pi/settings.json" "$HOME/.pi/agent/settings.json"
   fi
-  make_dir "$HOME/.pi/agent/skills"
-  for skill in "$ROOT"/pi/skills/*; do
-    [ -d "$skill" ] || continue
-    link_item "$skill" "$HOME/.pi/agent/skills/${skill##*/}"
-  done
-  make_dir "$HOME/.pi/agent/prompts"
-  for prompt in "$ROOT"/prompts/*.md; do
-    [ -f "$prompt" ] || continue
-    link_item "$prompt" "$HOME/.pi/agent/prompts/${prompt##*/}"
-  done
   make_dir "$HOME/.pi/agent/agents"
   for agent in "$ROOT"/pi/agents/*.md; do
     [ -f "$agent" ] || continue
-    link_item "$agent" "$HOME/.pi/agent/agents/${agent##*/}"
+    copy_item "$agent" "$HOME/.pi/agent/agents/${agent##*/}"
   done
-  link_item "$ROOT/pi/subagents.json" "$HOME/.pi/agent/extensions/subagent/config.json"
+  copy_item "$ROOT/pi/subagents.json" "$HOME/.pi/agent/extensions/subagent/config.json"
 fi
 
 if want codex; then
-  link_item "$ROOT/AGENTS.md" "$HOME/.codex/AGENTS.md"
+  copy_item "$ROOT/AGENTS.md" "$HOME/.codex/AGENTS.md"
   install_tool_skills "$HOME/.codex/skills"
 fi
 
 if want antigravity; then
-  link_item "$ROOT/AGENTS.md" "$HOME/.gemini/config/AGENTS.md"
+  copy_item "$ROOT/AGENTS.md" "$HOME/.gemini/config/AGENTS.md"
   install_tool_skills "$HOME/.gemini/config/skills"
   make_dir "$HOME/.gemini/config/agents"
   for agent_dir in "$ROOT"/antigravity/agents/*; do
     [ -d "$agent_dir" ] || continue
     name=${agent_dir##*/}
     make_dir "$HOME/.gemini/config/agents/$name"
-    link_item "$agent_dir/agent.md" "$HOME/.gemini/config/agents/$name/agent.md"
+    copy_item "$agent_dir/agent.md" "$HOME/.gemini/config/agents/$name/agent.md"
   done
 fi
 
