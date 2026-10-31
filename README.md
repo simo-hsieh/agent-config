@@ -6,10 +6,15 @@ Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md
 AGENTS.md      always-on defaults: communication, scope, playbook routing, delegation, safety
 rules/         coding — read by the agent before writing code
 skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
-  playbooks/   bugfix, feature (disabled skills routed by AGENTS.md)
-  understand/  auto-research
-  verify/      code-review
-  learn/       evidence-learning-loop
+  playbooks/   investigation, bugfix, feature, perf, ship, long-run (routed by AGENTS.md)
+  understand/  how, why, recall, teach, auto-research
+  clarify/     sharpen
+  design/      arena, model-the-domain, make-operations-idempotent
+  build/       tdd, typescript-best-practices
+  verify/      code-review, blast-radius, interrogate, benchmark-checklist, statechart,
+               create-/maintain-verification-skill, create-/maintain-formal-verification-skill
+  write/       unslop, technical-writing, ketchup, bro
+  learn/       evidence-learning-loop, reflect, correct
   operate/     pi-delegate
   tools/       jj, agent-browser, notion-mcp
 claude/        researcher and worker subagents (fallback outside Herdr)
@@ -67,5 +72,7 @@ flowchart LR
 ## Editing
 
 Edit here, never the installed copies. Keep every line behavior-changing: no emphasis words, no duplicated rules, no instructions the model follows by default. Review config changes like code; a global instruction affects every repository.
+
+Many skills and playbooks are adapted from [pstack](https://github.com/cursor/plugins/tree/main/pstack) (MIT, Lauren Tan); `docs/agent-flow/intent.md` records each adoption decision.
 
 Released under the [MIT License](LICENSE).

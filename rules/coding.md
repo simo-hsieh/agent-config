@@ -4,9 +4,13 @@ Read before writing or reviewing code. Project conventions override these.
 
 ## Design
 
-- Edit existing functions and classes directly. Add adapters, factories, or DTOs only when several callers need them.
-- Keep logic pure and I/O (file, network, DB, RPC, UI) in thin outer layers; the core never imports the shell. This keeps tests free of mocks.
-- One authoritative owner per piece of state. Compute derived state instead of caching a mirror.
+- Edit existing functions and classes directly. Add adapters, factories, or DTOs only when several callers need them. A new layer or piece of state must cut reader load elsewhere by as much; a reader should find quickly where a value comes from and what changes it.
+- Encode the domain in a structure (state machine, registry, discriminated union) instead of another if-branch or a second synced boolean; see `~/.agents/skills/model-the-domain/SKILL.md`.
+- Keep logic pure and I/O (file, network, DB, RPC, UI) in thin outer layers; the core never imports the shell. This keeps tests free of mocks. Parse external data (requests, files, env, DB rows) into typed domain values at the boundary and trust them inside; brand semantic IDs; derive types from the schema owner (proto, OpenAPI, migration).
+- One authoritative owner per piece of state. Compute derived state instead of caching a mirror. Remove a shared write target before adding a lock.
+- A state-changing operation converges from the current state, so running it twice or after a crash halfway ends the same; see `~/.agents/skills/make-operations-idempotent/SKILL.md`.
+- When replacing an API you own with no external users, move every caller and delete the old one in the same change.
+- The user includes the API consumer and the next maintainer; every option must earn its place.
 
 ## Naming and layout
 
@@ -22,6 +26,6 @@ Read before writing or reviewing code. Project conventions override these.
 
 ## Comments and tests
 
-- Comments explain intent, constraints, or non-obvious decisions, not what the code says.
-- Add or update tests when behavior changes and a useful test is practical. Prefer red-green: write the failing test, then the minimal fix.
+- Comments explain a non-obvious why the code can't show: intent, an external constraint, a decision. No narration of what the code does and no phase comments; when our own code needs a comment to stop being surprising, first try a rename or reshape that makes it obvious.
+- Add or update tests when behavior changes and a useful test is practical. Prefer red-green per `~/.agents/skills/tdd/SKILL.md`.
 - Do not hardcode values to satisfy tests; implement the general solution, and report a wrong test rather than working around it.
