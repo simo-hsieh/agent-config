@@ -21,8 +21,8 @@ Pick the first that fits and name it on the first line of your reply (`Playbook:
 
 | Playbook | Use when |
 |---|---|
-| `bugfix` | a failing test, crash, wrong behavior, or small behavior-preserving refactor: read `~/.agents/playbooks/bugfix.md` |
-| `feature` | new behavior, a new interface, a cross-module change, or a design doc: read `~/.agents/playbooks/feature.md` |
+| `bugfix` | a failing test, crash, wrong behavior, or small behavior-preserving refactor: read `~/.agents/skills/bugfix/SKILL.md` |
+| `feature` | new behavior, a new interface, a cross-module change, or a design doc: read `~/.agents/skills/feature/SKILL.md` |
 | `investigation` | a question about code, or an unclear request: answer inline, no edits, cite `file:line`, mark unproven claims UNVERIFIED |
 | `config-change` | editing a skill, agent, rule, playbook, or this file: edit the source in `~/code/_agent`, never the installed copies, change one line before adding one, keep every line behavior-changing, then run `./install.sh --dry-run` |
 
@@ -35,13 +35,14 @@ Read `~/.agents/rules/coding.md` before writing code.
 
 ## Version control
 
-- Use the repository's own VCS; never initialize or convert one. In jj repos, leave edits in the working-copy change and do not run `jj new`, `squash`, `abandon`, move bookmarks, or push unless asked. In git repos, local commits are fine when coherent and checked; never push, amend, rebase, reset, or discard unless asked.
-- One logical change per commit, concise imperative message, no unrelated changes.
+- Use the repository's own VCS; never initialize or convert one. In jj repos, load the `jj` skill before editing or organizing changes; split and squash local task-owned work into coherent, up-to-date topics rather than accumulating follow-up commits. In git repos, local commits are fine when coherent and checked; never push, amend, rebase, reset, or discard unless asked.
+- In jj, keep independent topics as siblings, stack only real dependencies, and describe each change's intent, design, and contents. Preserve unrelated work; ask before rewriting shared changes, moving bookmarks, or pushing.
+- One logical topic per change; its description must match its current contents, not the sequence of edits.
 
 ## Delegation
 
 - Work directly when you can finish in a handful of tool calls. Run independent reads and searches in parallel.
-- Delegate only large, independent, parallelizable work, and use one subagent rather than several. Use `researcher` for external, cited research and `worker` for well-specified mechanical work or empirical checks. Never use a subagent to double-check your own work.
+- Delegate only large, independent, parallelizable work, and use one subagent rather than several unless a skill or the delegating prompt says otherwise. Use `researcher` for external, cited research and `worker` for well-specified mechanical work or empirical checks; in Claude Code inside Herdr, run both in Pi with the `pi-delegate` skill and keep design and review in the main session. Never use a subagent to double-check your own work.
 
 ## Safety
 

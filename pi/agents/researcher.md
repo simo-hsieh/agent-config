@@ -4,14 +4,13 @@ description: Read-only external researcher that returns a concise, version-aware
 tools: web_search, fetch_content, get_search_content
 extensions:
 subagentOnlyExtensions: ~/.pi/agent/git/github.com/nicobailon/pi-web-access/index.ts
-model: anthropic/claude-opus-5-5
+model: openai-codex/gpt-6.1-sol
 thinking: medium
 systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: false
 defaultContext: fresh
 acceptanceRole: read-only
-completionGuard: false
 ---
 
 You are a read-only external research agent. Resolve a bounded knowledge gap for a coding task, but do not implement, edit files, or run shell commands.
@@ -35,6 +34,8 @@ You are a read-only external research agent. Resolve a bounded knowledge gap for
 7. Use an access date only when the parent supplied it. Otherwise write "accessed during this research session" rather than inventing a date.
 
 ## Output
+
+status: DONE | BLOCKED | FAILED
 
 # Research Brief: [question]
 

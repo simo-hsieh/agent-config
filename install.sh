@@ -2,6 +2,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+SRC=${AGENT_SRC:-$HOME/.agents/src}
 DRY_RUN=0
 WITH_SETTINGS=0
 SELECTED=""
@@ -12,9 +13,11 @@ usage() {
   cat <<'EOF'
 Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi]
 
+Links installed paths into the stable jj workspace at $AGENT_SRC
+(default ~/.agents/src), so only the change checked out there is live.
 With no component arguments, installs all supported adapters.
 Settings are opt-in because replacing a harness configuration can disable local
-hooks or permissions. Existing files are backed up outside harness discovery
+hooks or permissions. Replaced files are backed up outside harness discovery
 directories; they are never deleted.
 EOF
 }
@@ -28,6 +31,18 @@ for arg in "$@"; do
     *) echo "Unknown argument: $arg" >&2; usage >&2; exit 2 ;;
   esac
 done
+
+if [ ! -d "$SRC/.jj" ]; then
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "note   $SRC is not a jj workspace yet; listing from $ROOT" >&2
+    LIST=$ROOT
+  else
+    echo "Missing stable workspace $SRC. Create it with: jj -R $ROOT workspace add $SRC" >&2
+    exit 2
+  fi
+else
+  LIST=$SRC
+fi
 
 want() {
   [ -z "$SELECTED" ] || case "$SELECTED" in *" $1 "*) return 0;; *) return 1;; esac
@@ -43,109 +58,111 @@ make_dir() {
   [ "$DRY_RUN" -eq 1 ] || mkdir -p "$1"
 }
 
-items_match() {
-  src=$1
-  dst=$2
-
-  # Existing symlinks must be replaced even when they currently resolve to the
-  # same content, otherwise later working-tree edits remain globally active.
-  [ ! -L "$dst" ] || return 1
-  if [ -f "$src" ] && [ -f "$dst" ]; then
-    cmp -s "$src" "$dst"
-  elif [ -d "$src" ] && [ -d "$dst" ]; then
-    diff -qr "$src" "$dst" >/dev/null 2>&1
-  else
-    return 1
-  fi
+backup_item() {
+  dst=$1
+  case "$dst" in
+    "$HOME"/*) relative=${dst#"$HOME"/} ;;
+    *) echo "Refusing to back up destination outside HOME: $dst" >&2; exit 2 ;;
+  esac
+  backup="$BACKUP_ROOT/$relative"
+  make_dir "${backup%/*}"
+  while [ -e "$backup" ] || [ -L "$backup" ]; do
+    backup="$backup-next"
+  done
+  note "backup $dst -> $backup"
+  [ "$DRY_RUN" -eq 1 ] || mv "$dst" "$backup"
 }
 
-copy_item() {
-  src=$1
+# link_item <path relative to the source root> <installed path>
+link_item() {
+  target="$SRC/$1"
   dst=$2
-  parent=${dst%/*}
-  make_dir "$parent"
-
-  if items_match "$src" "$dst"; then
+  make_dir "${dst%/*}"
+  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$target" ]; then
     note "ok     $dst"
     return 0
   fi
-
   if [ -e "$dst" ] || [ -L "$dst" ]; then
-    case "$dst" in
-      "$HOME"/*) relative=${dst#"$HOME"/} ;;
-      *) echo "Refusing to back up destination outside HOME: $dst" >&2; exit 2 ;;
+    backup_item "$dst"
+  fi
+  note "link   $dst -> $target"
+  [ "$DRY_RUN" -eq 1 ] || ln -s "$target" "$dst"
+}
+
+# Skill directories are skills/<intent>/<skill>/ and install flat by name.
+skill_dirs() {
+  find "$LIST/skills" -mindepth 3 -maxdepth 3 -name SKILL.md | sed "s#^$LIST/##; s#/SKILL.md\$##" | sort
+}
+
+check_unique_names() {
+  dupes=$(skill_dirs | sed 's#.*/##' | sort | uniq -d)
+  if [ -n "$dupes" ]; then
+    echo "Duplicate skill names across intents: $dupes" >&2
+    exit 2
+  fi
+}
+
+link_skills() {
+  dir=$1
+  make_dir "$dir"
+  for rel in $(skill_dirs); do
+    link_item "$rel" "$dir/${rel##*/}"
+  done
+}
+
+# Remove links into the source root whose target no longer exists.
+prune_dangling() {
+  dir=$1
+  [ -d "$dir" ] || return 0
+  for link in "$dir"/*; do
+    [ -L "$link" ] || continue
+    case "$(readlink "$link")" in
+      "$SRC"/*) [ -e "$link" ] && continue
+        note "unlink $link"
+        [ "$DRY_RUN" -eq 1 ] || rm "$link" ;;
     esac
-    backup="$BACKUP_ROOT/$relative"
-    backup_parent=${backup%/*}
-    make_dir "$backup_parent"
-    while [ -e "$backup" ] || [ -L "$backup" ]; do
-      backup="$backup-next"
-    done
-    note "backup $dst -> $backup"
-    [ "$DRY_RUN" -eq 1 ] || mv "$dst" "$backup"
-  fi
+  done
+}
 
-  note "copy   $src -> $dst"
-  if [ "$DRY_RUN" -ne 1 ]; then
-    if [ -d "$src" ]; then
-      cp -Rp "$src" "$dst"
-    else
-      cp -p "$src" "$dst"
+# Playbooks moved into skills/playbooks/; retire their old copied files.
+retire_legacy() {
+  for name in bugfix feature; do
+    legacy="$HOME/.agents/playbooks/$name.md"
+    if [ -f "$legacy" ] && [ ! -L "$legacy" ]; then
+      backup_item "$legacy"
     fi
-  fi
-}
-
-install_shared_skills() {
-  make_dir "$HOME/.agents/skills"
-  for skill in "$ROOT"/skills/*; do
-    [ -d "$skill" ] || continue
-    copy_item "$skill" "$HOME/.agents/skills/${skill##*/}"
   done
 }
 
-install_shared_docs() {
-  for dir in rules playbooks; do
-    make_dir "$HOME/.agents/$dir"
-    for doc in "$ROOT/$dir"/*.md; do
-      [ -f "$doc" ] || continue
-      copy_item "$doc" "$HOME/.agents/$dir/${doc##*/}"
-    done
-  done
-}
+check_unique_names
 
-install_tool_skills() {
-  tool_dir=$1
-  make_dir "$tool_dir"
-  for skill in "$ROOT"/skills/*; do
-    [ -d "$skill" ] || continue
-    copy_item "$skill" "$tool_dir/${skill##*/}"
-  done
-}
-
-install_shared_skills
-install_shared_docs
+link_skills "$HOME/.agents/skills"
+prune_dangling "$HOME/.agents/skills"
+link_item rules/coding.md "$HOME/.agents/rules/coding.md"
+retire_legacy
 
 if want claude; then
-  copy_item "$ROOT/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-  install_tool_skills "$HOME/.claude/skills"
-  make_dir "$HOME/.claude/agents"
-  for agent in "$ROOT"/claude/agents/*.md; do
+  link_item AGENTS.md "$HOME/.claude/CLAUDE.md"
+  link_skills "$HOME/.claude/skills"
+  prune_dangling "$HOME/.claude/skills"
+  for agent in "$LIST"/claude/agents/*.md; do
     [ -f "$agent" ] || continue
-    copy_item "$agent" "$HOME/.claude/agents/${agent##*/}"
+    link_item "claude/agents/${agent##*/}" "$HOME/.claude/agents/${agent##*/}"
   done
+  prune_dangling "$HOME/.claude/agents"
 fi
 
 if want pi; then
-  copy_item "$ROOT/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
+  link_item AGENTS.md "$HOME/.pi/agent/AGENTS.md"
   if [ "$WITH_SETTINGS" -eq 1 ]; then
-    copy_item "$ROOT/pi/settings.json" "$HOME/.pi/agent/settings.json"
+    link_item pi/settings.json "$HOME/.pi/agent/settings.json"
   fi
-  make_dir "$HOME/.pi/agent/agents"
-  for agent in "$ROOT"/pi/agents/*.md; do
+  for agent in "$LIST"/pi/agents/*.md; do
     [ -f "$agent" ] || continue
-    copy_item "$agent" "$HOME/.pi/agent/agents/${agent##*/}"
+    link_item "pi/agents/${agent##*/}" "$HOME/.pi/agent/agents/${agent##*/}"
   done
-  copy_item "$ROOT/pi/subagents.json" "$HOME/.pi/agent/extensions/subagent/config.json"
+  prune_dangling "$HOME/.pi/agent/agents"
+  link_item pi/subagents.json "$HOME/.pi/agent/extensions/subagent/config.json"
 fi
 
 note "Done. Restart active agent sessions to reload configuration."
