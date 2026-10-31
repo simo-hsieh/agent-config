@@ -26,4 +26,4 @@ Do not treat intended design as proof of current behavior, or a hypothesis as a 
 
 ## Keep what is reusable
 
-Persist a lesson only when it is likely to be reused: put it in `~/code/_agent/rules/` or the project's docs with its scope, revision, and last-checked date. Keep raw transcripts, credentials, and customer data out. When the same mistake repeats, turn the correction into a rule, a skill, or a deterministic check.
+Persist a lesson only when it is likely to be reused: save it to memory (in Pi, list it in the report) with its scope, revision, and last-checked date; `reflect` promotes it into `~/code/_agent` or the project's docs with my approval. Keep raw transcripts, credentials, and customer data out. When the same mistake repeats, enforce it at the highest level that works: architecture or types, then a check or lint whose error names the fix, then a test, then rule or skill text.
