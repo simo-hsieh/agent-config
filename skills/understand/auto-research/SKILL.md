@@ -1,34 +1,22 @@
 ---
 name: auto-research
-description: Researches open questions that need evidence from several sources (local code, internal docs, external web and papers) and returns one cited report. Use for comparisons, prior art, best practice, or "why/how do others do X". Not for a single known-location lookup, a bug fix, or a question one file answers.
+description: Researches open questions that need external evidence from several sources (web, papers, vendor docs) and returns one cited report. Use for comparisons, prior art, best practice, or "how do others do X". Not for how this or another local codebase works (use how) or a single known-location lookup.
 ---
 
 # Auto Research
 
-Split the request into questions, route each by type, and merge the answers into one cited report.
-
-## Routing
-
-| Question type | Handled by |
-|---|---|
-| Where/how in this codebase | direct search |
-| External web, papers, vendor docs | `researcher` |
-
-Send each leaf only its own part of the question. When one answer depends on another, run them in order and pass the first result on. Run independent questions in parallel.
+Split the request into questions, send each to `researcher` with only its own part, and merge the answers into one cited report. Run independent questions in parallel; when one depends on another, run them in order and pass the first result on. A sub-question about local code goes back to the caller for `how`.
 
 ## Modes
 
-- **Quick (default):** one round, at most a few parallel leaves. Run it and state the mode in one line.
-- **Deep:** several rounds of leaves, run in the background. Say so in one line.
-- **Overnight / over an hour:** ask the user first in one line (cost, question, done-when), then end the turn.
-
-## Overnight loop
-
-1. Write `intent.md` with the question, done-when condition, and budget (default 6 h) in a scratch directory outside the repo.
-2. Each round: pick open questions, fan out to leaves, merge, then decide whether new evidence appeared and whether sources contradict.
-3. Stop when done-when is met, after two rounds with no new evidence, or when the budget is spent.
-4. Make no code commits; the user decides next steps.
+- **Quick (default):** one round, a few parallel questions. State the mode in one line.
+- **Deep:** several rounds in the background. State it in one line.
+- **Longer than an hour:** run under the `long-run` playbook (`~/.agents/skills/long-run/SKILL.md`), where advancing means new evidence.
 
 ## Report
 
-List findings with sources (`file:line`, URL, with access date when supplied), mark what is UNVERIFIED, and list open questions. Send empirical checks (scratch repros, benchmarks, test runs) to `worker` instead of guessing.
+Findings with sources (`file:line`, URL with access date), UNVERIFIED marks, and open questions. Send empirical checks (scratch repros, benchmarks, test runs) to `worker` instead of guessing.
+
+## Saving
+
+Save only deep runs or on request: a repo-tied report goes in that repo's docs, any other in `~/notes/research/<YYYY-MM-DD>-<topic>.md`. The header records the date, question, sources, and, when repo-tied, the jj change it was based on. A saved report is dated evidence: live code and newer evidence override it, and a `design.md` that relies on it restates the decision and cites it.
