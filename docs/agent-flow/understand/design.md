@@ -1,6 +1,6 @@
 # Design: understand
 
-Status: draft, awaiting acceptance. Implements the `understand` decisions in
+Status: live, published at change pzsztlyw. Implements the `understand` decisions in
 [`../intent.md`](../intent.md).
 
 ## Requirements

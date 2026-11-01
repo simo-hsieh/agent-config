@@ -1,6 +1,6 @@
 # Intent: reorganize agent settings by intent, using pstack as a reference
 
-Status: draft, awaiting acceptance.
+Status: live; decisions implemented and published at change pzsztlyw.
 
 ## Problem
 
@@ -64,12 +64,12 @@ Playbook backlog, mapped from pstack's 23 playbooks:
 
 | Playbook | Mine today | pstack sources | Verdict |
 |---|---|---|---|
-| investigation | inline row in AGENTS.md | investigation, session-pickup | pending |
-| bugfix | playbooks/bugfix.md | bug-fix | pending |
-| feature | playbooks/feature.md | feature, refactoring, prototype, visual-parity, authoring-a-skill, eval | gates + design lines decided (see Decisions); rest pending |
-| perf | none | perf-issue, hillclimb, runtime-forensics, trace-forensics | pending |
-| ship | none | opening-a-pr, babysit, shipping | pending |
-| long-run | auto-research overnight loop | figure-it-out (base, decided), autonomous-run, orchestrate, autopilot-full, autopilot-stack, multi-phase-plan, pause-safely | base decided; rest pending |
+| investigation | inline row in AGENTS.md | investigation, session-pickup | drafted, live |
+| bugfix | playbooks/bugfix.md | bug-fix | drafted, live |
+| feature | playbooks/feature.md | feature, refactoring, prototype, visual-parity, authoring-a-skill, eval | drafted, live |
+| perf | none | perf-issue, hillclimb, runtime-forensics, trace-forensics | drafted, live |
+| ship | none | opening-a-pr, babysit, shipping | drafted, live |
+| long-run | auto-research overnight loop | figure-it-out (base, decided), autonomous-run, orchestrate, autopilot-full, autopilot-stack, multi-phase-plan, pause-safely | drafted, live; details open |
 
 Out of scope: benny automations, make-bot-ui, worktree-cleanup.
 
@@ -359,7 +359,13 @@ Out of scope: benny automations, make-bot-ui, worktree-cleanup.
 
 ## Open questions
 
-1. Review order: proposed understand → clarify → design → build → verify →
-   write → learn → operate, then playbooks.
-2. Golden rules for intent.md ↔ design.md: what belongs in each, including
+1. Golden rules for intent.md ↔ design.md: what belongs in each, including
    how success criteria are stated. Settle in the feature playbook review.
+2. Long-run details: whether the frame waits for a checkpoint, where the trail
+   lives and whether it is committed, and whether `show-me-your-work` becomes
+   its format.
+3. Per-playbook review of the six drafts; they were accepted as a whole.
+4. Whether interrogate can read Pi's capacity from Herdr before starting
+   (UNVERIFIED); today it relies on Pi reporting a quota error.
+5. End-to-end runs of `statechart`'s pinned tool and Pi's `--thinking xhigh`
+   retry (UNVERIFIED).
