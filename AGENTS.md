@@ -1,6 +1,6 @@
 # Personal Agent Instructions
 
-Defaults for all projects, tuned for Claude Opus 5.5. Repository instructions and the user's current request take precedence when they are more specific.
+Defaults for all projects. Repository instructions and the user's current request take precedence when they are more specific.
 
 ## Communication
 
