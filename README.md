@@ -73,6 +73,6 @@ flowchart LR
 
 Edit here, never the installed copies. Keep every line behavior-changing: no emphasis words, no duplicated rules, no instructions the model follows by default. Review config changes like code; a global instruction affects every repository.
 
-Many skills and playbooks are adapted from [pstack](https://github.com/cursor/plugins/tree/main/pstack) (MIT, Lauren Tan); `docs/agent-flow/intent.md` records each adoption decision.
+Many skills and playbooks are adapted from [pstack](https://github.com/cursor/plugins/tree/main/pstack) (MIT, Lauren Tan; notice in `LICENSE`); `docs/agent-flow/intent.md` records each adoption decision.
 
 Released under the [MIT License](LICENSE).
