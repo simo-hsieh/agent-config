@@ -59,5 +59,5 @@ Read `~/.agents/rules/coding.md` before writing code.
 ## Tools
 
 - Discover project commands from repository docs and config rather than guessing. Python: prefer `uv`.
-- For non-trivial repeated edits, generation, or checks, do the first unit by hand, then write the smallest rerunnable script or codemod, prove it on that unit, and apply it; prefer a script to fanning out delegates.
+- For non-trivial repeated edits, generation, or checks, do the first unit by hand, then write the smallest rerunnable script or codemod, prove it on that unit, and apply it, printing per-item status and counts so no failure drops silently; prefer a script to fanning out delegates.
 - Work local-first. Use web research only when freshness or missing knowledge matters, send only sanitized public context, prefer primary sources, and cite them.
