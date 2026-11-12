@@ -1,0 +1,65 @@
+{
+  "defaultThinkingLevel": "medium",
+  "subagents": {
+    "defaultModel": "openai-codex/gpt-6.1-sol",
+    "defaultThinking": "medium",
+    "modelScope": {
+      "enforce": true,
+      "strict": true,
+      "allow": [
+        "openai-codex/gpt-6.1-sol"
+      ]
+    },
+    "agentOverrides": {
+      "worker": {
+        "thinking": "medium"
+      },
+      "reviewer": {
+        "disabled": true
+      },
+      "oracle": {
+        "disabled": true
+      },
+      "evidence-auditor": {
+        "disabled": true
+      },
+      "delegate": {
+        "disabled": true
+      },
+      "claude-code": {
+        "disabled": true
+      },
+      "claude-code-writer": {
+        "disabled": true
+      },
+      "codex-exec": {
+        "disabled": true
+      },
+      "codex-exec-writer": {
+        "disabled": true
+      },
+      "cursor-agent": {
+        "disabled": true
+      },
+      "cursor-agent-writer": {
+        "disabled": true
+      }
+    }
+  },
+  "packages": [
+    {
+      "source": "git:github.com/nicobailon/pi-web-access@f0c0a96a8f19198e767cbec2e447f38779ccca50",
+      "extensions": [],
+      "skills": []
+    },
+    {
+      "source": "git:github.com/nicobailon/pi-subagents@7d072b91dca7e1aa915282f0159cec0175d65efa",
+      "skills": [],
+      "prompts": []
+    }
+  ],
+  "theme": "dark",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6.1-sol",
+  "hideThinkingBlock": true
+}
