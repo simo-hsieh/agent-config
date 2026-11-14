@@ -5,7 +5,7 @@ description: Researches open questions that need external evidence from several 
 
 # Auto Research
 
-Split the request into questions, research each with only its own part, and merge the answers into one cited report. Inside Herdr, send each question through `delegate` to `pi-fast`, `agy-fast`, and `claude-fast` in parallel, because each searches a different engine (`models.md`, Task map); outside Herdr, send it to `researcher`. Run independent questions in parallel; when one depends on another, run them in order and pass the first result on. A sub-question about local code goes back to the caller for `how`.
+Split the request into questions, research each with only its own part, and merge the answers into one cited report. Inside Herdr, send each question through `delegate` to `pi-fast`, `agy-fast`, and `claude-fast` in parallel, because each searches a different engine (`models.md`, Task map); outside Herdr, research it in the main session and mark the three-engine comparison unavailable. Run independent questions in parallel; when one depends on another, run them in order and pass the first result on. A sub-question about local code goes back to the caller for `how`.
 
 ## Modes
 

@@ -16,9 +16,9 @@ Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi] [agy]
 Links installed paths into the stable jj workspace at $AGENT_SRC
 (default ~/.agents/src), so only the change checked out there is live.
 With no component arguments, installs all supported adapters.
-Settings are opt-in because replacing a harness configuration can disable local
-hooks or permissions. Replaced files are backed up outside harness discovery
-directories; they are never deleted.
+Full Pi settings are opt-in. Native subagent controls are always applied:
+merge Claude tool denies and remove Pi's subagent package, preserving other
+settings. Replaced files are backed up outside harness discovery directories.
 EOF
 }
 
@@ -134,6 +134,64 @@ retire_legacy() {
   done
 }
 
+# Merge only single-agent controls; never replace machine-local hooks or permissions.
+disable_subagents() {
+  kind=$1
+  dst=$2
+  note "check  $dst (disable native subagents)"
+  python3 - "$kind" "$dst" "$ROOT/claude/settings.json" "$BACKUP_ROOT" "$DRY_RUN" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+kind, filename, policy, backup_root, dry_run = sys.argv[1:]
+path = Path(filename)
+config = json.loads(path.read_text()) if path.exists() else {}
+before = json.dumps(config, sort_keys=True)
+if kind == "claude":
+    deny = config.setdefault("permissions", {}).setdefault("deny", [])
+    for tool in json.loads(Path(policy).read_text())["permissions"]["deny"]:
+        if tool not in deny:
+            deny.append(tool)
+else:
+    config.pop("subagents", None)
+    for resource in ("packages", "extensions"):
+        if resource in config:
+            config[resource] = [
+                item for item in config[resource]
+                if "pi-subagents" not in (item["source"] if isinstance(item, dict) else item)
+            ]
+if before == json.dumps(config, sort_keys=True):
+    print(f"ok     {path} (single-agent controls)")
+else:
+    print(f"update {path} (single-agent controls)")
+    if dry_run != "1":
+        if path.exists() or path.is_symlink():
+            backup = Path(backup_root) / path.relative_to(Path.home())
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            while backup.exists() or backup.is_symlink():
+                backup = backup.with_name(backup.name + "-next")
+            print(f"backup {path} -> {backup}")
+            os.rename(path, backup)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(config, indent=2) + "\n")
+PY
+}
+
+# Retire only definitions and runtime links owned by this installer.
+retire_subagents() {
+  dir=$1
+  [ -d "$dir" ] || return 0
+  for item in "$dir"/*; do
+    [ -L "$item" ] || continue
+    case "$(readlink "$item")" in
+      "$SRC"/claude/agents/*|"$SRC"/pi/agents/*|"$SRC"/pi/subagents.json)
+        backup_item "$item" ;;
+    esac
+  done
+}
+
 check_unique_names
 
 link_skills "$HOME/.agents/skills"
@@ -145,11 +203,8 @@ if want claude; then
   link_item AGENTS.md "$HOME/.claude/CLAUDE.md"
   link_skills "$HOME/.claude/skills"
   prune_dangling "$HOME/.claude/skills"
-  for agent in "$LIST"/claude/agents/*.md; do
-    [ -f "$agent" ] || continue
-    link_item "claude/agents/${agent##*/}" "$HOME/.claude/agents/${agent##*/}"
-  done
-  prune_dangling "$HOME/.claude/agents"
+  retire_subagents "$HOME/.claude/agents"
+  disable_subagents claude "$HOME/.claude/settings.json"
 fi
 
 if want pi; then
@@ -157,12 +212,9 @@ if want pi; then
   if [ "$WITH_SETTINGS" -eq 1 ]; then
     link_item pi/settings.json "$HOME/.pi/agent/settings.json"
   fi
-  for agent in "$LIST"/pi/agents/*.md; do
-    [ -f "$agent" ] || continue
-    link_item "pi/agents/${agent##*/}" "$HOME/.pi/agent/agents/${agent##*/}"
-  done
-  prune_dangling "$HOME/.pi/agent/agents"
-  link_item pi/subagents.json "$HOME/.pi/agent/extensions/subagent/config.json"
+  retire_subagents "$HOME/.pi/agent/agents"
+  retire_subagents "$HOME/.pi/agent/extensions/subagent"
+  disable_subagents pi "$HOME/.pi/agent/settings.json"
 fi
 
 if want agy; then
