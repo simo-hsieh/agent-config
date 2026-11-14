@@ -1,6 +1,6 @@
 # Personal agent configuration
 
-Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md` is the always-on instruction file; everything else loads on demand. Claude Code and Pi are thin adapters.
+Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md` is the always-on instruction file; everything else loads on demand. Claude Code, Pi, and Antigravity (`agy`) are thin adapters.
 
 ```text
 AGENTS.md      always-on defaults: communication, scope, playbook routing, delegation, safety
@@ -19,6 +19,7 @@ skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   tools/       jj, agent-browser, notion-mcp
 claude/        researcher and worker subagents (fallback outside Herdr)
 pi/            subagent definitions, settings.json, runtime limits
+agy/           no-subagents hook plugin and delegate tab deny list
 install.sh     symlink installer into the stable workspace ~/.agents/src
 ```
 
@@ -28,7 +29,7 @@ Project-specific commands and conventions belong in each project's own `AGENTS.m
 
 ```sh
 ./install.sh --dry-run          # preview
-./install.sh claude pi          # selected adapters (default: all)
+./install.sh claude pi agy      # selected adapters (default: all)
 ./install.sh --with-settings pi
 ```
 
@@ -42,10 +43,11 @@ jj -R ~/.agents/src workspace update-stale      # after rewriting the accepted c
 
 | Source | Installed to |
 |---|---|
-| `skills/<intent>/<skill>`, `rules/*` | `~/.agents/skills/<skill>`, `~/.agents/rules/` (skills also to `~/.claude/skills/<skill>`) |
-| `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md` |
+| `skills/<intent>/<skill>`, `rules/*` | `~/.agents/skills/<skill>`, `~/.agents/rules/` (skills also to `~/.claude/skills/<skill>` and `~/.gemini/config/skills/<skill>`) |
+| `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md`, `~/.gemini/config/AGENTS.md` |
 | `claude/agents/*.md` | `~/.claude/agents/` |
 | `pi/agents/*.md`, `pi/subagents.json` | `~/.pi/agent/agents/`, `~/.pi/agent/extensions/subagent/config.json` |
+| `agy/plugins/*` | `~/.gemini/config/plugins/` |
 
 Settings are opt-in (`--with-settings`) because replacing them can disable local hooks or permissions. Restart agent sessions after installing.
 

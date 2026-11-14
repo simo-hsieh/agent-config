@@ -11,7 +11,7 @@ BACKUP_ROOT=${XDG_STATE_HOME:-$HOME/.local/state}/agent-config-installer/backups
 
 usage() {
   cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi]
+Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi] [agy]
 
 Links installed paths into the stable jj workspace at $AGENT_SRC
 (default ~/.agents/src), so only the change checked out there is live.
@@ -27,7 +27,7 @@ for arg in "$@"; do
     --dry-run) DRY_RUN=1 ;;
     --with-settings) WITH_SETTINGS=1 ;;
     -h|--help) usage; exit 0 ;;
-    claude|pi) SELECTED="$SELECTED $arg " ;;
+    claude|pi|agy) SELECTED="$SELECTED $arg " ;;
     *) echo "Unknown argument: $arg" >&2; usage >&2; exit 2 ;;
   esac
 done
@@ -163,6 +163,17 @@ if want pi; then
   done
   prune_dangling "$HOME/.pi/agent/agents"
   link_item pi/subagents.json "$HOME/.pi/agent/extensions/subagent/config.json"
+fi
+
+if want agy; then
+  link_item AGENTS.md "$HOME/.gemini/config/AGENTS.md"
+  link_skills "$HOME/.gemini/config/skills"
+  prune_dangling "$HOME/.gemini/config/skills"
+  for plugin in "$LIST"/agy/plugins/*; do
+    [ -d "$plugin" ] || continue
+    link_item "agy/plugins/${plugin##*/}" "$HOME/.gemini/config/plugins/${plugin##*/}"
+  done
+  prune_dangling "$HOME/.gemini/config/plugins"
 fi
 
 note "Done. Restart active agent sessions to reload configuration."

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "deny": [
+      "command(git push)",
+      "command(jj git push)",
+      "command(gh pr create)",
+      "command(gh pr merge)",
+      "command(jj bookmark)"
+    ]
+  }
+}

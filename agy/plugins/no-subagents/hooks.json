@@ -1,0 +1,16 @@
+{
+  "no-subagents": {
+    "PreToolUse": [
+      {
+        "matcher": "invoke_subagent|define_subagent|swarm|run_workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/deny-subagents.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
