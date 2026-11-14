@@ -1,6 +1,6 @@
 # Personal agent configuration
 
-Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md` is the always-on instruction file; everything else loads on demand. Claude Code and Pi are thin adapters.
+Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md` is the always-on instruction file; everything else loads on demand. Claude Code, Pi, and Antigravity (`agy`) are thin adapters.
 
 ```text
 AGENTS.md      always-on defaults: communication, scope, playbook routing, delegation, safety
@@ -15,10 +15,13 @@ skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
                create-/maintain-verification-skill, create-/maintain-formal-verification-skill
   write/       unslop, technical-writing, ketchup, bro
   learn/       evidence-learning-loop, reflect, correct
-  operate/     pi-delegate
+  operate/     delegate
   tools/       jj, agent-browser, notion-mcp
-claude/        researcher and worker subagents (fallback outside Herdr)
+claude/        researcher and worker subagents (outside Herdr), delegate tab deny list
 pi/            subagent definitions, settings.json, runtime limits
+agy/           no-subagents hook plugin and delegate tab deny list
+models.md      model and effort per harness tier, task routing, evidence
+bin/           model-usage: per-model delegate stats from session logs
 install.sh     symlink installer into the stable workspace ~/.agents/src
 ```
 
@@ -28,7 +31,7 @@ Project-specific commands and conventions belong in each project's own `AGENTS.m
 
 ```sh
 ./install.sh --dry-run          # preview
-./install.sh claude pi          # selected adapters (default: all)
+./install.sh claude pi agy      # selected adapters (default: all)
 ./install.sh --with-settings pi
 ```
 
@@ -42,31 +45,32 @@ jj -R ~/.agents/src workspace update-stale      # after rewriting the accepted c
 
 | Source | Installed to |
 |---|---|
-| `skills/<intent>/<skill>`, `rules/*` | `~/.agents/skills/<skill>`, `~/.agents/rules/` (skills also to `~/.claude/skills/<skill>`) |
-| `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md` |
+| `skills/<intent>/<skill>`, `rules/*` | `~/.agents/skills/<skill>`, `~/.agents/rules/` (skills also to `~/.claude/skills/<skill>` and `~/.gemini/config/skills/<skill>`) |
+| `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md`, `~/.gemini/config/AGENTS.md` |
 | `claude/agents/*.md` | `~/.claude/agents/` |
 | `pi/agents/*.md`, `pi/subagents.json` | `~/.pi/agent/agents/`, `~/.pi/agent/extensions/subagent/config.json` |
+| `agy/plugins/*` | `~/.gemini/config/plugins/` |
 
 Settings are opt-in (`--with-settings`) because replacing them can disable local hooks or permissions. Restart agent sessions after installing.
 
 ## Models
 
-- **Orchestrator and thinker:** Claude Opus 5.5 at `medium` effort in Claude Code, for planning, design, review, and final judgment; set the effort in your own Claude Code settings. Opus is not allowed in Pi.
-- **Other roles:** Pi on GPT-6.1 Sol (`openai-codex/gpt-6.1-sol`, thinking `medium`; `scout` keeps `low`), started by Claude Code in Herdr tabs through the `pi-delegate` skill as `researcher` and `worker`. A task that fails twice is retried at `xhigh`, then taken over by Opus.
-- **Backup:** outside Herdr or when Pi hits its quota, Opus does small tasks itself and the Claude Code subagents take larger ones: `worker` on Sonnet 5.5 `high`, `researcher` on Sonnet 5.5 `medium`. Pi has no automatic fallback; pi-subagents 0.76 removed `fallbackModels`.
-- **Last resort, manual:** when Claude usage is also exhausted, run Pi or Gemini CLI on Gemini 4 Argon (`high`) yourself. No Google provider is configured here.
-- **Why:** on the Artificial Analysis Coding Agent Index (October 2026), GPT-6.1 Sol `medium` scores 61 at $0.70 and 11 minutes per task, against 55 at $1.24 and 12 minutes for Sonnet 5.5 `high`, 55 at $6.35 for GPT-5.6 Sol `max` (the previous Pi model), 63 at $3.33 and 27 minutes for Sonnet 5.5 `xhigh`, and 64 at $5.84 and 35 minutes for Gemini 4 Argon. Haiku 5.5 scores at most 41 and is not used.
+[`models.md`](models.md) holds the model and effort for each harness tier, which tab takes each task type, the evidence, and the review procedure. In short:
+
+- **Orchestrator:** the session you steer, normally Claude Code on Opus 5.5, does design, hard bugs, and final review. Opus is not allowed in Pi.
+- **Delegates:** inside Herdr, the `delegate` skill runs `researcher` and `worker` work in a thinking or fast tab of Claude Code, Pi (GPT-6.1), or agy (Gemini 4), chosen by task type. Cross-family seats (`arena`, `interrogate`, `reflect`) take any family other than the author's.
+- **Out of quota:** a tab that hits a usage limit is marked blocked for the session and its work goes to the next tab in its Task map row; with every other harness blocked, the orchestrator does the work itself. When the orchestrator's own harness hits its limit, continue in a Pi or agy session; the same skills and `models.md` apply there.
+- **Outside Herdr:** Claude Code gives larger tasks to its `researcher` and `worker` subagents on Sonnet 5.5; Pi uses its own subagents; agy works single-agent.
 
 ```mermaid
 flowchart LR
-  CC["Claude Code<br/>Opus 5.5<br/>orchestrate, design, review"]
-  CC -->|"HERDR_ENV=1<br/>pi-delegate skill"| HT["Herdr tab per role"]
-  HT --> PI["Pi main session<br/>GPT-6.1 Sol"]
-  PI --> PR["researcher subagent<br/>web tools only"]
-  PI --> PW["worker subagent"]
-  CC -->|"outside Herdr<br/>or Pi quota hit"| CS["Claude subagents<br/>researcher, worker<br/>Sonnet 5.5"]
-  PI -. "status: DONE / BLOCKED / FAILED<br/>summary + report path" .-> CC
-  CS -. "status line + report" .-> CC
+  O["Orchestrator<br/>Claude Code, Pi, or agy"]
+  O -->|"delegate skill<br/>models.md Task map"| T["Herdr tab<br/>harness and tier"]
+  T --> C["Claude Code<br/>Opus or Sonnet"]
+  T --> P["Pi<br/>Sol or Terra"]
+  T --> A["agy<br/>Carbon or Hydrogen"]
+  T -. "BLOCKED on quota<br/>next tab in row" .-> T
+  T -. "status line + report" .-> O
 ```
 
 ## Editing

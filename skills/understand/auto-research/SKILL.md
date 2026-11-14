@@ -5,7 +5,7 @@ description: Researches open questions that need external evidence from several 
 
 # Auto Research
 
-Split the request into questions, send each to `researcher` with only its own part, and merge the answers into one cited report. Run independent questions in parallel; when one depends on another, run them in order and pass the first result on. A sub-question about local code goes back to the caller for `how`.
+Split the request into questions, research each with only its own part, and merge the answers into one cited report. Inside Herdr, send each question through `delegate` to `pi-fast`, `agy-fast`, and `claude-fast` in parallel, because each searches a different engine (`models.md`, Task map); outside Herdr, send it to `researcher`. Run independent questions in parallel; when one depends on another, run them in order and pass the first result on. A sub-question about local code goes back to the caller for `how`.
 
 ## Modes
 
@@ -15,7 +15,7 @@ Split the request into questions, send each to `researcher` with only its own pa
 
 ## Report
 
-Findings with sources (`file:line`, URL with access date), UNVERIFIED marks, and open questions. Send empirical checks (scratch repros, benchmarks, test runs) to `worker` instead of guessing.
+Findings with sources (`file:line`, URL with access date), UNVERIFIED marks, and open questions. After a three-engine fan-out, a claim is a finding when sources from at least two engines support it and is marked single-engine otherwise; conflicts between engines become open questions; a seat that returned `BLOCKED` is not rerouted, and the report names its missing engine. Send empirical checks (scratch repros, benchmarks, test runs) to `worker` instead of guessing.
 
 ## Saving
 

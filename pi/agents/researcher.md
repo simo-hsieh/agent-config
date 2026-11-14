@@ -4,8 +4,7 @@ description: Read-only external researcher that returns a concise, version-aware
 tools: web_search, fetch_content, get_search_content
 extensions:
 subagentOnlyExtensions: ~/.pi/agent/git/github.com/nicobailon/pi-web-access/index.ts
-model: openai-codex/gpt-6.1-sol
-thinking: medium
+model: inherit
 systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: false

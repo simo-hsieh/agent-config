@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""Print delegate runs per harness, model, effort, and Task map row, for the models.md review.
+
+A run is a top-level session whose last assistant reply starts with a delegate
+status line. agy stores conversations as protobuf blobs with no published
+schema, so agy runs are counted but not parsed.
+"""
+import json
+import re
+import statistics
+import sys
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
+STATUS_LINE = re.compile(r"^status:\s*(DONE|BLOCKED|FAILED)\b", re.MULTILINE)
+TASK_LINE = re.compile(r"^task:\s*(.+)$", re.MULTILINE)
+
+
+@dataclass(frozen=True)
+class Run:
+    harness: str
+    model: str
+    effort: str
+    task: str
+    status: str
+    minutes: float
+    tokens: int
+
+
+def text_of(content) -> str:
+    if isinstance(content, str):
+        return content
+    return "\n".join(block.get("text", "") for block in content if block.get("type") == "text")
+
+
+def timestamp_seconds(value) -> float:
+    if isinstance(value, (int, float)):
+        return value / 1000
+    return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
+
+
+def run_from(harness: str, turns: list[dict]) -> Run | None:
+    """turns: assistant turns in order, each with text, model, effort, tokens, time."""
+    if not turns:
+        return None
+    report = turns[-1]["text"]
+    status = STATUS_LINE.search(report)
+    if not status:
+        return None
+    task = TASK_LINE.search(report)
+    last = turns[-1]
+    return Run(
+        harness=harness,
+        model=last["model"],
+        effort=last["effort"] or "?",
+        task=task.group(1).strip() if task else "?",
+        status=status.group(1),
+        minutes=(last["time"] - turns[0]["time"]) / 60,
+        tokens=sum(turn["tokens"] for turn in turns),
+    )
+
+
+def claude_turns(records: list[dict]) -> list[dict]:
+    turns = []
+    for record in records:
+        if record.get("type") != "assistant" or record.get("isSidechain"):
+            continue
+        message = record["message"]
+        usage = message.get("usage") or {}
+        turns.append({
+            "text": text_of(message.get("content", [])),
+            "model": message.get("model", "?"),
+            "effort": record.get("effort"),
+            "tokens": sum(usage.get(key, 0) for key in ("input_tokens", "cache_creation_input_tokens", "output_tokens")),
+            "time": timestamp_seconds(record["timestamp"]),
+        })
+    return [turn for turn in turns if turn["text"]] or turns
+
+
+def pi_turns(records: list[dict]) -> list[dict]:
+    turns = []
+    for record in records:
+        message = record.get("message") or {}
+        if message.get("role") != "assistant":
+            continue
+        usage = message.get("usage") or {}
+        turns.append({
+            "text": text_of(message.get("content", [])),
+            "model": f"{message.get('provider', '?')}/{message.get('model', '?')}",
+            "effort": message.get("thinkingLevel"),
+            "tokens": usage.get("totalTokens", 0) - usage.get("cacheRead", 0),
+            "time": timestamp_seconds(message.get("timestamp") or record["timestamp"]),
+        })
+    return [turn for turn in turns if turn["text"]] or turns
+
+
+def read_jsonl(path: Path) -> list[dict]:
+    records = []
+    bad_lines = 0
+    for line in path.read_text(errors="replace").splitlines():
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError:
+            bad_lines += 1
+    if bad_lines:
+        print(f"skip {bad_lines} unparsable lines in {path}", file=sys.stderr)
+    return records
+
+
+def collect(home: Path) -> tuple[list[Run], int]:
+    runs = []
+    sources = [
+        ("claude", sorted(home.glob(".claude/projects/*/*.jsonl")), claude_turns),
+        ("pi", sorted(home.glob(".pi/agent/sessions/*/*.jsonl")), pi_turns),
+    ]
+    for harness, paths, turns_of in sources:
+        for path in paths:
+            run = run_from(harness, turns_of(read_jsonl(path)))
+            if run:
+                runs.append(run)
+    agy_conversations = len(list(home.glob(".gemini/antigravity-cli/conversations/*.db")))
+    return runs, agy_conversations
+
+
+def summarize(runs: list[Run]) -> list[tuple]:
+    groups: dict[tuple, list[Run]] = {}
+    for run in runs:
+        groups.setdefault((run.harness, run.model, run.effort, run.task), []).append(run)
+    rows = []
+    for key, group in sorted(groups.items()):
+        done = [run for run in group if run.status == "DONE"]
+        rows.append((
+            *key,
+            len(group),
+            f"{len(done) / len(group):.0%}",
+            f"{statistics.median(run.minutes for run in group):.1f}",
+            sum(run.tokens for run in group) // len(done) if done else "-",
+        ))
+    return rows
+
+
+def main() -> None:
+    runs, agy_conversations = collect(Path.home())
+    header = ("harness", "model", "effort", "task", "runs", "done", "median_min", "tokens_per_done")
+    print("\t".join(header))
+    for row in summarize(runs):
+        print("\t".join(str(value) for value in row))
+    print(f"agy: {agy_conversations} conversations not parsed (protobuf blobs)", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

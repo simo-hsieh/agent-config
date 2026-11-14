@@ -57,7 +57,7 @@ A `principle-` item becomes a `rules/coding.md` line, plus a disabled skill unde
 | verify | code-review | interrogate, blast-radius, benchmark-checklist, no-comments (+ comment-sicko agent), create-/maintain-verification-skill, create-/maintain-formal-verification-skill; principle-fix-root-causes, -attack-the-premise, -prove-it-works, -test-behavior-not-implementation, -explain-the-number | decided (see Decisions) |
 | write | (AGENTS.md Communication) | unslop, technical-writing, ketchup, ketchup-video, bro, show-me-your-work | decided (see Decisions) |
 | learn | evidence-learning-loop | reflect, correct, automate-me; principle-encode-lessons-in-structure | decided (see Decisions) |
-| operate | AGENTS.md, pi-delegate | poteto-mode (core rules), poteto-help, setup-pstack, poteto-agent; principle-build-the-lever, -guard-the-context-window, -never-block-on-the-human | decided (see Decisions) |
+| operate | AGENTS.md, delegate | poteto-mode (core rules), poteto-help, setup-pstack, poteto-agent; principle-build-the-lever, -guard-the-context-window, -never-block-on-the-human | decided (see Decisions) |
 | tools | jj, agent-browser, notion-mcp | (none) | keep |
 
 Playbook backlog, mapped from pstack's 23 playbooks:

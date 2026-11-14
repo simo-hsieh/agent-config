@@ -7,7 +7,7 @@ Status: live, published at change pzsztlyw. Implements the `understand` decision
 
 - **R1 Intent folders.** Sources live at `skills/<intent>/<skill>/SKILL.md`.
   Existing skills move: `understand/auto-research`, `verify/code-review`,
-  `learn/evidence-learning-loop`, `operate/pi-delegate`,
+  `learn/evidence-learning-loop`, `operate/delegate`,
   `tools/{jj,agent-browser,notion-mcp}`.
 - **R1b Live install by symlink.** A second jj workspace at `~/.agents/src`
   holds the accepted version. `install.sh` links every installed path into

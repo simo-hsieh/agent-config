@@ -1,6 +1,6 @@
 # Design: delegate tabs across Claude Code, Pi, and agy
 
-Status: draft for review. Intent: [`intent.md`](intent.md). Claims marked UNVERIFIED have not been checked by a run.
+Status: plan steps 1 to 3 done 2026-11-14; steps 4 and 5 pending. Intent: [`intent.md`](intent.md). Claims marked UNVERIFIED have not been checked by a run.
 
 Evidence: recommendations from a Claude Code tab (Opus 5.5) and a Pi tab (GPT-6.1 Sol, `high`) given the same brief on 2026-11-13, research by Pi and agy the same day, and the tab runs observed in that session. agy's own recommendation is missing because its tab stopped at a file-access prompt. On 2026-11-14 Claude, Pi, and agy tabs, asked whether to cut to two harnesses, all recommended dropping agy. The user keeps it (Alternatives, A1) and asked for routing by which model does each task type best.
 
@@ -219,9 +219,13 @@ Decision: route by task type through the Task map, reordered only on evidence (R
 
 Steps 3 to 5 spend quota on all three subscriptions and need approval.
 
+Step 3 ran on 2026-11-14 from the repo paths, one fast tab per harness. Each tab returned `status: DONE` with `harness:` and `task:` lines and refused to start a Herdr agent. `jj bookmark list` was denied in Claude Code and agy by their `delegate.json` and ran in Pi, which has no deny list. Pi's report read cleanly from its session JSONL. Pi could not see its own model and effort, so the brief now states them.
+
 ## Concerns
 
 - agy sign-in: the permission warning was still present on 2026-11-14. Clear it with `/logout` and a new sign-in before step 3. Owner: user.
 - agy paths: decide whether delegate tabs pass `--add-dir` for paths outside the workspace or keep agy to the workspace. Owner: user.
 - Search engines: `~/.pi/web-search.json` pins `"provider": "brave"` today, so two of the three seats search the same index until it changes. Owner: user, since the file is machine-local.
 - Claude delegate tabs run in auto mode; `claude/delegate.json` is their only push guard.
+- agy shell commands fail in delegate tabs: the shell from `/nix/store` cannot load `libpcre2-8.0.dylib` because agy's file-system sandbox blocks `/nix/store` (step 3). File reads work. Fix by allowing `/nix/store` reads in agy's sandbox or giving agy a system shell. Owner: user, since it changes a security setting.
+- `bin/model-usage` cannot read agy's conversation blobs, which are protobuf with no published schema; agy outcomes come from the reports the orchestrator read.

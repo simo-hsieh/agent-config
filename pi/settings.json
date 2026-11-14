@@ -1,15 +1,16 @@
 {
   "defaultThinkingLevel": "medium",
   "subagents": {
-    "defaultModel": "openai-codex/gpt-6.1-sol",
     "defaultThinking": "medium",
     "modelScope": {
       "enforce": true,
       "strict": true,
       "allow": [
-        "openai-codex/gpt-6.1-sol"
+        "openai-codex/gpt-6.1-sol",
+        "openai-codex/gpt-6.1-terra"
       ]
     },
+    "agentExcludeDirs": ["~/.agents/src/claude"],
     "agentOverrides": {
       "worker": {
         "thinking": "medium"
