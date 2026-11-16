@@ -13,7 +13,7 @@ Delegated work runs on whichever of three model families does that kind of task 
 - R1. A `delegate` skill groups work in named outcome workspaces, starts or safely reuses delegate tabs, sends a brief, waits, and reads the report. Finished tabs remain open by default; accumulated idle tabs created by the orchestrator may be cleaned up after their results are collected.
 - R2. Each harness has a thinking tier and a fast tier. Model IDs and efforts live only in `models.md`, except config files a harness reads directly, which `models.md` lists.
 - R3. Every report starts with `status: DONE | BLOCKED | FAILED`, then a `harness:` line with the harness, model, and effort, and a `task:` line naming its Task map row.
-- R4. A delegate tab knows it is a delegate. It does not start Herdr agents and does not push, merge, open PRs, or move bookmarks. Claude Code and Pi delegates may use in-harness subagents; agy runs single-agent in every role.
+- R4. A delegate tab knows it is a delegate and works single-agent in every harness. It does not start Herdr agents, native subagents, teams, workflows, or swarms and does not push, merge, open PRs, or move bookmarks. Herdr-only delegation is flat; outside Herdr, work stays in the main session.
 - R5. `arena`, `interrogate`, and `reflect` ask for a seat from another family through `delegate` instead of naming Claude or Pi.
 - R6. A tab is quota-blocked when its report says `status: BLOCKED` for quota or its pane shows a usage-limit error. The orchestrator then skips that harness for the session, or until the reset time the pane shows, and sends the brief to the next tab in the Task map row. With no tab left, fast work runs in the main session and a cross-family seat is skipped by name.
 - R7. The orchestrator routes each task by the Task map in `models.md`. The task type picks the tier and an order of tabs; equals go to the subscription with more quota left; the order changes only on per-task-type evidence.
@@ -88,9 +88,9 @@ Start arguments per harness; every flag appears in the CLI's `--help`:
 
 | Harness | Arguments after `--` | Delegate marker | Report source |
 |---|---|---|---|
-| Claude Code | `--model <id> --effort <level> --permission-mode auto --name <tab> --settings ~/.agents/src/claude/delegate.json --append-system-prompt "<contract>"` | `--append-system-prompt`; `claude/delegate.json` denies `git push`, `jj git push`, `gh pr create`, `gh pr merge`, `jj bookmark` | pane |
-| Pi | `--model <id>:<level> --session-id <uuid> --append-system-prompt "<contract>"` | `--append-system-prompt` (Pi 1.5) | last assistant message in `~/.pi/agent/sessions/--<cwd>--/*_<uuid>.jsonl`, because the pane can stay scrolled to an earlier reply |
-| agy | `--model <id> --effort <level> --mode auto --settings ~/.agents/src/agy/delegate.json` | first paragraph of the brief; `agy/delegate.json` has the same deny list; the `no-subagents` plugin blocks `invoke_subagent`, `define_subagent`, `swarm`, and `run_workflow` | pane |
+| Claude Code | `--model <id> --effort <level> --name <topic> --settings ~/.agents/src/claude/delegate.json --disallowedTools Agent,Task,TeamCreate --append-system-prompt "<contract>"` | `--append-system-prompt`; `claude/delegate.json` denies `git push`, `jj git push`, `gh pr create`, `gh pr merge`, `jj bookmark` | pane |
+| Pi | `--model <id>:<level> --name <topic> --session-id <uuid> --exclude-tools 'subagent*' --append-system-prompt "<contract>"` | `--append-system-prompt` (Pi 1.5) | last assistant message at the live `agent_session.value` path from `herdr agent get`, because resets can change sessions and the pane can stay scrolled to an earlier reply |
+| agy | `--model <id> --effort <level> --settings ~/.agents/src/agy/delegate.json` | first paragraph of the brief; `agy/delegate.json` has the same deny list; the `no-subagents` plugin blocks `invoke_subagent`, `define_subagent`, `swarm`, and `run_workflow` | pane |
 
 agy runs single-agent because its subagents and background tasks let the parent turn go idle and race `herdr agent prompt --wait`.
 
@@ -98,11 +98,9 @@ Observed startup behavior, 2026-11-13 and 2026-11-14: Claude Code started and an
 
 ### Delegate contract
 
-The contract is the same text in every harness:
+The authoritative contract is in [`delegate`](../../../skills/operate/delegate/SKILL.md#contract) and applies to new and reused agents in every harness. It requires flat, single-agent work, explicit writable paths, integrator-owned shared mutations and history, independent tests/runtime resources, and a report after background mutating commands finish. The brief names the integrator, writable whole files/subtrees, forbidden paths, staged interfaces, allowed commands/tests, and runtime resources. Everything outside assigned writable paths is forbidden; a brief without writable paths is read-only.
 
-> You are a delegate. Do not start Herdr agents or delegate to another harness. Do not push, merge, open PRs, or move bookmarks. Start your final reply with `status: DONE | BLOCKED | FAILED` (BLOCKED with the reason, `quota` when a usage limit stopped you), then lines `harness: <name> <model> <effort>` and `task: <Task map row>`, a 1-3 line summary, what changed or ran with exact commands and real output, and anything unexpected. Wait for your subagents and background tasks before the final reply. Write a long report to the path the brief gives.
-
-Without the first sentence, a Claude delegate in a Herdr tab reads the AGENTS.md Delegation line, sees `HERDR_ENV=1`, and opens tabs of its own. The status line comes ahead of the `Playbook:` line AGENTS.md asks for, so the orchestrator can parse it. The brief holds the goal, exact files, steps, done-when, the Task map row, and the tab's harness, model, and effort.
+Without the delegate marker, a Claude delegate in a Herdr tab reads the AGENTS.md Delegation line, sees `HERDR_ENV=1`, and opens tabs of its own. The status line comes ahead of the `Playbook:` line AGENTS.md asks for, so the orchestrator can parse it. The brief holds the goal, exact files, steps, done-when, the Task map row, and the tab's harness, model, and effort.
 
 The orchestrator:
 
@@ -127,22 +125,30 @@ Each harness is `Available` or `Blocked` for the orchestrator's session; the orc
 
 - A `status: BLOCKED` report naming quota, or a usage-limit, rate-limit, 429, or quota error in the pane, moves the harness to `Blocked`. The orchestrator leaves the tab open, records the reset time if the pane shows one, sends the same brief to the next eligible role in the same outcome workspace, and tells the user once.
 - A timeout or stall alone does not block a harness; the orchestrator reads the pane first.
-- A delegate's subagent that hits a limit surfaces it to the tab: pi-subagents returns a 429 from the resolved model and never switches models (pi-subagents `docs/models.md`).
+- Delegates never use native subagents to work around quota limits; the orchestrator follows the role map and cross-family requirements.
 - Never reroute inside an `auto-research` fan-out; the report names the missing engine (R8).
 - Never route a cross-family seat to the author's family; with no other family left, the skill reports the seat as skipped, for example "not interrogated".
 - Never retry a blocked harness before its reset time in the same session.
 
 ### Orchestration
 
-Whichever session the user steers is the orchestrator, in any harness, and delegation is one level deep. A Claude Code or Pi delegate may use its own subagents; agy never uses subagents, workflows, or swarms, and no delegate starts a Herdr agent. This replaces the 2026-11-08 rule "no delegate drives another harness", which conflicted with multi-agent intent decision 2 (Alternatives, A4).
+Whichever session the user steers is the orchestrator, in any harness. Delegation is flat and Herdr-only; every delegate works single-agent. Delegation is chosen by benefit versus briefing, coordination, and verification overhead, not task size. Ordinary tasks do not require a committee.
+
+Independent whole files or subtrees can have concurrent implementation delegates in one checkout without a jj workspace per worker. Before the wave, one integrator stages shared interfaces and assigns explicit writable and forbidden paths. Ownership is cooperative convention, not enforced locking or isolation.
+
+During the wave, delegates edit only assigned paths, run no jj commands (including snapshotting reads), Git mutations, or broad mutating commands, and test only independent inputs/output resources. The integrator owns shared files, manifests/lockfiles, snapshots/history organization, repo-wide formatting/codegen, and integrated tests, but avoids competing edits and history operations until the barrier.
+
+At the barrier, the integrator confirms writers and background mutating commands stopped; Herdr `--wait` alone is not proof. It reviews diffs, resolves shared changes, formats/generates/tests together, revalidates relevant reader findings, and organizes coherent jj topics. Unexpected overlap stops affected writers while preserving edits; work is reassigned or serialized without auto-reverting someone else.
+
+Readers may run in parallel but can observe unfinished or stale state. Each shared app instance has one live driver; parallel drives require separate runtime resources.
 
 ### Research fan-out
 
 Claude Code's web search runs on Brave (Anthropic subprocessor list; Simon Willison, 2025-03-21). Pi's `web_search` uses OpenAI search through the ChatGPT subscription when `~/.pi/web-search.json` sets `"provider": "openai"`. agy grounds on Google (third-party write-ups, UNVERIFIED). `auto-research` sends each question to the three fast tabs and merges by R8. A fan-out costs three fast tasks of quota, so a single lookup stays on one tab.
 
-### Pi subagent models
+### Native subagents
 
-Pi subagents follow the tab's model so a `pi-fast` tab does not spend Sol on its subagents. `pi/settings.json` leaves `subagents.defaultModel` unset and allows Sol and Terra in `subagents.modelScope`; `pi/agents/researcher.md` uses `model: inherit`. pi-subagents does not inherit the parent's thinking level, so subagents run at `defaultThinking` `medium`.
+Native subagents are disabled in every harness. Legacy Pi subagent model settings and agent definitions do not authorize their use; delegated work runs in Herdr tabs under the selected model and effort.
 
 ### Usage review
 

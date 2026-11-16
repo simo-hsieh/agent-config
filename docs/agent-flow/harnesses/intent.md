@@ -19,7 +19,11 @@ Delegation reaches only Pi, through `pi-delegate`, and only from Claude Code. Ea
 ## Constraints
 
 - Delegates never push, merge, open PRs, or move bookmarks.
-- A delegate never starts another Herdr agent. Claude Code and Pi delegates may use their own in-harness subagents; agy never uses its built-in subagents, workflows, or swarms, in any role.
+- Delegation is flat and Herdr-only. A delegate never starts another agent or uses native subagents, teams, workflows, or swarms in any harness. Outside Herdr, work stays in the main session.
+- Delegation depends on benefit versus overhead, not a large-task threshold; ordinary tasks need no committee.
+- Independent whole files/subtrees may be written concurrently in one checkout with explicit writable and forbidden paths. Ownership is cooperative convention, not locking or isolation; no jj workspace per worker is required.
+- One integrator stages shared interfaces and owns shared files, manifests/lockfiles, snapshots/history, repo-wide formatting/codegen, and integrated tests. During a write wave, it avoids competing edits and history operations; all delegates, including readers, run no jj or broad mutating commands. Worker tests require independent inputs/output resources.
+- Integration waits until writers and background mutating commands have stopped; Herdr `--wait` alone is insufficient. On overlap, stop affected writers, preserve edits, and reassign or serialize without auto-reverting others. Reader findings are revalidated at integration; each shared app instance has one live driver.
 - Files a harness rewrites at runtime (settings, trust lists, auth) stay machine-local.
 - Pi, Codex, opencode, and Hermes share one ChatGPT quota and model family, so only one of them earns a tab: Pi.
 - Each paid subscription needs its own harness, so none can be dropped without wasting a subscription: Opus runs only in Claude Code (README, Models), and Pi 0.71.0 removed its built-in Antigravity login (Pi CHANGELOG), so the Google subscription is reachable only through agy.

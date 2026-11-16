@@ -7,6 +7,7 @@ description: Use before editing or organizing changes in a Jujutsu (jj) reposito
 
 ## Inspect and preserve
 
+- In a shared-checkout write wave, delegates, including readers, do not run jj, including reads that may snapshot. The integrator handles the workflow below before launch and after confirming all writers and background mutating commands stopped; it avoids competing edits and history operations during the wave.
 - Read repository instructions and inspect `jj status`, `jj log`, and relevant diffs and descriptions before editing. In colocated repositories, use jj rather than Git to manage history.
 - Identify task-owned changes, unrelated user work, real dependencies, and shared revisions. Do not infer ownership merely because a change is mutable or unpublished.
 - Split, squash, describe, and rebase local task-owned work as needed without asking at each step. Ask before rewriting shared work, moving bookmarks, or pushing; never discard unrelated work.
