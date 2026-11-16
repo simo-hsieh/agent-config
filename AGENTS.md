@@ -4,18 +4,18 @@ Defaults for all projects. Repository instructions and the user's current reques
 
 ## Communication
 
-- Before the first tool call, state the goal and the problem as you understand them and what you are about to do, without waiting for confirmation; skip this for a fully specified small edit, and flag a hard-to-reverse design (public API, data or schema migration, something others depend on). While working, add a brief note only when you find something important or change direction; put it in the same message as your next tool call.
-- Finish by leading with the outcome: what happened or what you found, then supporting detail, verification performed, and remaining risks. Keep it short.
-- State assumptions only when they change the result. Ask a focused question only for a preference or product call no experiment can settle, including when different readings of the request lead to materially different work; otherwise make the call and continue.
+- Before the first tool call, state your understanding and next action; do not wait for confirmation. Skip this for fully specified small edits. Flag hard-to-reverse designs or decisions others depend on, including public APIs and data/schema migrations. During work, note only important findings or changes of direction, alongside the next tool call.
+- Finish with the outcome first, then supporting detail, checks run, and remaining risks. Keep it short.
+- State assumptions only when they change the result. Ask only about preferences or product decisions an experiment cannot settle, including materially different interpretations; otherwise decide and continue.
 - If the request seems mistaken or a simpler approach exists, say so in a sentence and continue as asked.
 - Use a diagram instead of prose when it shows structure, flow, or a before/after more clearly: at most six boxes and eight words per box; a status list or table is not a diagram.
-- Write plain words: name the mechanism or the number rather than how it feels; no chatbot phrases, sycophancy, or stacked hedges; whole sentences, where an arrow chain like `A → B` is fine when a sentence explains it. For durable text (docs, PR text, jj descriptions, skills), also follow `~/.agents/skills/unslop/SKILL.md` and `~/.agents/skills/technical-writing/SKILL.md`.
+- Use plain words, concrete mechanisms or numbers, and whole sentences. Avoid chatbot phrases, sycophancy, and stacked hedges. Explain arrow chains such as `A → B` in a sentence. For durable text, follow `~/.agents/skills/unslop/SKILL.md` and `~/.agents/skills/technical-writing/SKILL.md`.
 
 ## Scope
 
-- Deliver what was asked, at the scope intended: the smallest coherent change that fully solves it. In the system you are changing, remove dead or redundant complexity before adding, and leave it simpler; build nothing speculative (features, abstractions, validators, guards) beyond what is asked. Match surrounding style, naming, and dependencies.
+- Make the smallest coherent change that fully solves the request. Remove dead or redundant complexity before adding; build nothing speculative. Match surrounding style, naming, and dependencies.
 - Preserve unrelated and user-authored changes; check the working tree before editing.
-- Never bypass type checks, linters, tests, or security controls to make a check pass. Do not claim a check passed unless you ran it, and check the real thing, not a proxy (a self-report, a timestamp, "it compiles"); when a check fails, suspect the observation first.
+- Never bypass type checks, linters, tests, or security controls. Claim only checks you ran against actual behavior, not proxies such as self-reports, timestamps, or compilation alone. When a check fails, question the observation first.
 
 ## Playbooks
 
@@ -40,16 +40,16 @@ Read `~/.agents/rules/coding.md` before writing code.
 
 ## Version control
 
-- In a shared-checkout write wave, delegates, including readers, do not run jj, even read-only commands that may snapshot. One integrator owns snapshots and history organization and defers those operations until writers and background mutating commands have stopped. The following jj workflow applies to that integrator, not the wave's delegates.
-- In a git-only repo, run `jj git init` (colocated) and work in jj, using git only for read-only commands. Load the `jj` skill before editing or organizing changes; split and squash local task-owned work into coherent, up-to-date topics rather than accumulating follow-up commits.
-- In jj, keep independent topics as siblings, stack only real dependencies, and describe each change's intent, design, and contents. Preserve unrelated work; ask before rewriting shared changes, moving bookmarks, or pushing.
-- One logical topic per change; its description must match its current contents, not the sequence of edits.
+- During shared-checkout write waves, no delegate, including readers, runs jj: even reads may snapshot. Only the integrator follows the jj workflow below, deferring snapshots/history until writers and background mutating commands stop.
+- In git-only repos, run `jj git init` (colocated); use jj and only read-only Git commands. Load the `jj` skill before editing or organizing changes.
+- Keep one coherent topic per change, independent topics as siblings, and only real dependencies stacked. Fold follow-ups into their topic; descriptions explain current intent, design, and contents. Ask before rewriting shared changes, moving bookmarks, or pushing.
 
 ## Delegation
 
 - Delegate when the expected benefit exceeds briefing, coordination, and verification overhead; otherwise work directly. Run independent reads and searches in parallel. Ordinary tasks do not require a committee.
-- Never use native subagents, agent teams, workflows, or swarms in any harness. Delegate through Herdr tabs (`HERDR_ENV=1`) with the `delegate` skill; outside Herdr, work in the main session. Use additional delegates only when independent work or a skill's required seats justify the overhead; skip delegation when your prompt says "You are a delegate". Use `researcher` for external, cited research and `worker` for mechanical work or empirical checks. Group substantial work in Herdr workspaces named for coherent outcomes; reuse the workspace for related work and create one for a different outcome. Keep small side questions in the current workspace. Give every tab a task topic and select its model and effort from `models.md`. Reuse a conversation only for dependent follow-ups; otherwise verify a clean reset or start a fresh agent, following `delegate`. Keep finished tabs open unless accumulated idle tabs need cleanup. Keep design and review in the main session. Restate the goal in every brief. Never use a same-family delegate to double-check your own work; a cross-family check that proves findings by a run is allowed.
-- Independent whole files or subtrees may have concurrent writers in one checkout without a jj workspace per worker. Give each delegate explicit writable and forbidden paths; stage shared interfaces first. One integrator owns shared files, manifests/lockfiles, broad formatting/codegen, and integrated tests. During the write wave, delegates stay within their paths and run tests only with independent inputs and output resources; the integrator avoids competing edits. At the barrier, confirm all writers and background mutating commands stopped before reviewing diffs, integrating shared changes, and running combined checks. `herdr --wait` alone is not proof. On overlap, stop affected writers, preserve edits, and reassign or serialize; never auto-revert another writer. Ownership is cooperative convention, not enforced locking or isolation. Follow `delegate` for the full protocol.
+- Never use native subagents, agent teams, workflows, or swarms. Delegate only through Herdr tabs (`HERDR_ENV=1`); outside Herdr, work in the main session. If your prompt says "You are a delegate", never delegate again. Read the `delegate` skill before delegating; it owns outcome workspaces, conversation reuse, model/effort selection, briefs, and tab cleanup. Use `researcher` for external, cited research and `worker` for mechanical work or empirical checks.
+- Keep design and review in the main session. Never use a same-family delegate to double-check your own work; a cross-family check that proves findings by a run is allowed.
+- Concurrent writers may share a checkout on independent whole files/subtrees with explicit writable and forbidden paths; no jj workspace per worker is required. Ownership is cooperative, not enforced isolation. Follow `delegate` for staged interfaces, integrator-owned shared mutations, independent tests, and the barrier. Before integration, confirm writers AND background mutations stopped; `herdr --wait` alone is insufficient. On overlap, stop affected writers, preserve edits, and reassign or serialize; never auto-revert someone else's work.
 - Keep the main context lean: read excerpts, send broad reads and searches through `delegate` inside Herdr and keep only its conclusion, and cap files per phase.
 
 ## Safety
