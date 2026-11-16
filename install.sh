@@ -3,6 +3,9 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 SRC=${AGENT_SRC:-$HOME/.agents/src}
+RELEASES=${SRC%/*}/releases
+REV=HEAD
+REV_GIVEN=0
 DRY_RUN=0
 WITH_SETTINGS=0
 SELECTED=""
@@ -11,10 +14,12 @@ BACKUP_ROOT=${XDG_STATE_HOME:-$HOME/.local/state}/agent-config-installer/backups
 
 usage() {
   cat <<'EOF'
-Usage: ./install.sh [--dry-run] [--with-settings] [claude] [pi] [agy]
+Usage: ./install.sh [--dry-run] [--with-settings] [--rev <commit>] [claude] [pi] [agy]
 
-Links installed paths into the stable jj workspace at $AGENT_SRC
-(default ~/.agents/src), so only the change checked out there is live.
+Publishes one git commit: exports it read-only to <releases>/<sha>, points
+$AGENT_SRC (default ~/.agents/src) at that export, and links installed paths
+into $AGENT_SRC. Only the commit last installed is live. Without --rev it
+installs HEAD and refuses uncommitted changes; --rev <older commit> rolls back.
 With no component arguments, installs all supported adapters.
 Full Pi settings are opt-in. Native subagent controls are always applied:
 merge Claude tool denies and remove Pi's subagent package, preserving other
@@ -22,27 +27,18 @@ settings. Replaced files are backed up outside harness discovery directories.
 EOF
 }
 
-for arg in "$@"; do
-  case "$arg" in
+while [ $# -gt 0 ]; do
+  case "$1" in
     --dry-run) DRY_RUN=1 ;;
     --with-settings) WITH_SETTINGS=1 ;;
+    --rev) [ $# -ge 2 ] || { usage >&2; exit 2; }; REV=$2; REV_GIVEN=1; shift ;;
+    --rev=*) REV=${1#--rev=}; REV_GIVEN=1 ;;
     -h|--help) usage; exit 0 ;;
-    claude|pi|agy) SELECTED="$SELECTED $arg " ;;
-    *) echo "Unknown argument: $arg" >&2; usage >&2; exit 2 ;;
+    claude|pi|agy) SELECTED="$SELECTED $1 " ;;
+    *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
+  shift
 done
-
-if [ ! -d "$SRC/.jj" ]; then
-  if [ "$DRY_RUN" -eq 1 ]; then
-    echo "note   $SRC is not a jj workspace yet; listing from $ROOT" >&2
-    LIST=$ROOT
-  else
-    echo "Missing stable workspace $SRC. Create it with: jj -R $ROOT workspace add $SRC" >&2
-    exit 2
-  fi
-else
-  LIST=$SRC
-fi
 
 want() {
   [ -z "$SELECTED" ] || case "$SELECTED" in *" $1 "*) return 0;; *) return 1;; esac
@@ -117,7 +113,7 @@ prune_dangling() {
   for link in "$dir"/*; do
     [ -L "$link" ] || continue
     case "$(readlink "$link")" in
-      "$SRC"/*) [ -e "$link" ] && continue
+      "$SRC"/*) target=$(readlink "$link"); [ -e "$LIST/${target#"$SRC"/}" ] && continue
         note "unlink $link"
         [ "$DRY_RUN" -eq 1 ] || rm "$link" ;;
     esac
@@ -134,12 +130,74 @@ retire_legacy() {
   done
 }
 
+# A release is an immutable export of one commit, so live files never change
+# under a running agent and no edit is live until it is committed and installed.
+resolve_commit() {
+  COMMIT=$(git -C "$ROOT" rev-parse --verify --quiet "$REV^{commit}") || {
+    echo "Unknown revision: $REV" >&2; exit 2; }
+  if [ "$REV_GIVEN" -eq 0 ]; then
+    dirty=$(git -C "$ROOT" status --porcelain)
+    if [ -n "$dirty" ]; then
+      printf '%s\n' "$dirty" >&2
+      echo "Uncommitted changes in $ROOT would not be installed. Commit them, or pass --rev <commit>." >&2
+      exit 2
+    fi
+  fi
+  RELEASE=$RELEASES/$COMMIT
+}
+
+# Sets LIST to the release contents; a dry run exports to a temporary directory.
+export_release() {
+  if [ -d "$RELEASE" ]; then
+    LIST=$RELEASE
+    return 0
+  fi
+  if [ "$DRY_RUN" -eq 1 ]; then
+    LIST=$(mktemp -d)
+    trap 'chmod -R u+w "$LIST" && rm -rf "$LIST"' EXIT
+  else
+    mkdir -p "$RELEASES"
+    LIST=$RELEASES/.tmp-$COMMIT-$$
+    mkdir "$LIST"
+  fi
+  git -C "$ROOT" archive "$COMMIT" | tar -x -C "$LIST"
+  chmod -R a-w "$LIST"
+  note "export $(git -C "$ROOT" log -1 --format='%h %s' "$COMMIT") -> $RELEASE"
+  if [ "$DRY_RUN" -eq 0 ]; then
+    chmod u+w "$LIST"
+    mv "$LIST" "$RELEASE"
+    chmod a-w "$RELEASE"
+    LIST=$RELEASE
+  fi
+}
+
+# Swaps the live link in one rename, so readers see the old or new release, never a mix.
+publish_release() {
+  if [ -L "$SRC" ] && [ "$(readlink "$SRC")" = "$RELEASE" ]; then
+    note "ok     $SRC -> $RELEASE"
+    return 0
+  fi
+  if [ -e "$SRC" ] && [ ! -L "$SRC" ]; then
+    backup_item "$SRC"
+  fi
+  note "live   $SRC -> $RELEASE"
+  [ "$DRY_RUN" -eq 1 ] || python3 -c '
+import os, sys
+release, src = sys.argv[1:]
+staged = src + ".new"
+if os.path.lexists(staged):
+    os.remove(staged)
+os.symlink(release, staged)
+os.replace(staged, src)
+' "$RELEASE" "$SRC"
+}
+
 # Merge only single-agent controls; never replace machine-local hooks or permissions.
 disable_subagents() {
   kind=$1
   dst=$2
   note "check  $dst (disable native subagents)"
-  python3 - "$kind" "$dst" "$ROOT/claude/settings.json" "$BACKUP_ROOT" "$DRY_RUN" <<'PY'
+  python3 - "$kind" "$dst" "$LIST/claude/settings.json" "$BACKUP_ROOT" "$DRY_RUN" <<'PY'
 import json
 import os
 import sys
@@ -192,7 +250,11 @@ retire_subagents() {
   done
 }
 
+resolve_commit
+export_release
 check_unique_names
+make_dir "${SRC%/*}"
+publish_release
 
 link_skills "$HOME/.agents/skills"
 prune_dangling "$HOME/.agents/skills"

@@ -17,8 +17,8 @@ Improvements flow through stages, each producing an artifact the next consumes:
 1. **Found**, in any repo and either harness: when I correct the agent, or it hits friction (a skill that misfired or was missing, a repeated workaround), it writes one issue note to a central local inbox: the repo, the transcript path, what happened, and a suggested change.
 2. **Collect**, in a batch I start in `~/code/_agent`: group notes into issue classes; a class seen twice or more ranks first.
 3. **Propose**, per class: the exact file and line in the rule's one home, the behavior it should change, and the cases it must fix. A proposal can be a check or script instead of prose. I pick which proposals go forward.
-4. **Verify**, for now by a human run: I try the proposed jj change in real work by publishing it to `~/.agents/src` and roll back with `jj -R ~/.agents/src new <previous change>` if it falls short. A benchmark that replays each case against the current and proposed config replaces this later.
-5. **Apply**: the jj change's description records the cases and how they were verified; it stays published only with my approval.
+4. **Verify**, for now by a human run: I try the proposed commit in real work by installing it with `./install.sh` and roll back with `./install.sh --rev <previous commit>` if it falls short. A benchmark that replays each case against the current and proposed config replaces this later.
+5. **Apply**: the commit message records the cases and how they were verified; it stays published only with my approval.
 
 ## Constraints
 

@@ -78,14 +78,14 @@ Files written in the VM can run on the Mac later. These paths are the risk, with
 
 | Path | Rule |
 |---|---|
-| `.git/hooks`, `.jj` config, `.envrc`, `package.json` scripts, `.vscode/tasks.json` | On the Mac, run `jj`/`git` with hooks off for repos an agent in the VM touched (UNVERIFIED which repos need it); direnv stays off for `~/code` |
-| `~/code/_agent` | The Mac's live config is `~/.agents/src`, outside `~/code`. A change made in the VM goes live only after I review the jj change and update `~/.agents/src` |
+| `.git/hooks`, `.jj` config, `.envrc`, `package.json` scripts, `.vscode/tasks.json` | On the Mac, run `git` with hooks off for repos an agent in the VM touched (UNVERIFIED which repos need it); direnv stays off for `~/code` |
+| `~/code/_agent` | The Mac's live config is `~/.agents/src`, outside `~/code`. A change made in the VM goes live only after I review the commit and run `./install.sh` on the Mac |
 | Credentials | Never under `~/code`; `cloud-secrets` lives in `~/.secrets` |
 
 ## R4: harness install in the VM
 
-1. As root: install Node, uv, jj, Docker rootless prerequisites (`uidmap`, `passt`), nftables.
-2. As `simo`: `jj workspace add ~/.agents/src` from `~/code/_agent`, then `./install.sh`. The installer is POSIX `sh` and its paths are `$HOME`-relative; a Linux run is UNVERIFIED.
+1. As root: install Node, uv, Docker rootless prerequisites (`uidmap`, `passt`), nftables.
+2. As `simo`: `./install.sh` from `~/code/_agent`; it publishes the checked-out commit to `~/.agents/src`. The installer is POSIX `sh` and its paths are `$HOME`-relative; a Linux run is UNVERIFIED.
 3. Install or update Claude Code, Pi, Codex, agy, and Hermes at the Mac's versions.
 4. Sign in each harness inside the VM (browser OAuth on the Mac, device code where offered). These are the only credentials in the VM.
 

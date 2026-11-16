@@ -15,7 +15,8 @@ skill, playbook, and principle answers one question: which intent is it for?
 - The repo is organized by intent: the intent is the folder name, and each
   skill or principle is one skill inside that folder.
 - My existing workflow (AGENTS.md router, intent.md → design.md → code loop,
-  researcher/worker delegation, jj) stays the backbone.
+  researcher/worker delegation, jj) stays the backbone. jj was replaced by
+  git on 2026-11-17; see `git/design.md`.
 - Each pstack item is reviewed one skill at a time, in discussion, within its
   intent group, and gets a verdict: **adopt**, **adapt** (rewrite into my
   flow), **merge** (into an existing skill), or **skip**.
@@ -350,8 +351,8 @@ Out of scope: benny automations, make-bot-ui, worktree-cleanup.
 - Installed skill discovery is flat (`~/.claude/skills/<name>/`,
   `~/.agents/skills/<name>/`): the installer flattens
   `skills/<intent>/<skill>/`, and skill names are unique across intents.
-- Drafts never go live; installs link to a stable jj workspace that moves
-  only to accepted changes.
+- Drafts never go live; `install.sh` publishes only a committed revision
+  (see `git/design.md`).
 - No verbatim copy: each adopted item is rewritten to fit my rules (concise,
   every line behavior-changing, harness-neutral across Claude Code and Pi).
 - pstack assumes Cursor features (multi-model panels, Bugbot, automations);

@@ -90,9 +90,9 @@ Start arguments per harness; every flag appears in the CLI's `--help`:
 |---|---|---|---|
 | Claude Code | `--model <id> --effort <level> --name <topic> --settings ~/.agents/src/claude/delegate.json --disallowedTools Agent,Task,TeamCreate --append-system-prompt "<contract>"` | `--append-system-prompt`; `claude/delegate.json` denies `git push`, `jj git push`, `gh pr create`, `gh pr merge`, `jj bookmark` | pane |
 | Pi | `--model <id>:<level> --name <topic> --session-id <uuid> --exclude-tools 'subagent*' --append-system-prompt "<contract>"` | `--append-system-prompt` (Pi 1.5) | last assistant message at the live `agent_session.value` path from `herdr agent get`, because resets can change sessions and the pane can stay scrolled to an earlier reply |
-| agy | `--model <id> --effort <level> --settings ~/.agents/src/agy/delegate.json` | first paragraph of the brief; `agy/delegate.json` has the same deny list; the `no-subagents` plugin blocks `invoke_subagent`, `define_subagent`, `swarm`, and `run_workflow` | pane |
+| agy | `--model <id> --effort <level> --settings ~/.agents/src/agy/delegate.json` | first paragraph of the brief; `agy/delegate.json` has the same deny list; the `no-subagents` plugin blocks `define_subagent`, `swarm`, `run_workflow`, and every `invoke_subagent` whose `TypeName` is not `browser` | pane |
 
-agy runs single-agent because its subagents and background tasks let the parent turn go idle and race `herdr agent prompt --wait`.
+agy runs single-agent because its subagents and background tasks let the parent turn go idle and race `herdr agent prompt --wait`. The `browser` subagent is the exception: it is agy's only way to drive a browser, so the hook reads `toolCall.args` and allows a call only when every entry's `TypeName` is `browser`, in either the flat `{TypeName}` shape agy records or the documented `Subagents` array. A browser subagent still idles the parent turn, so a delegate brief must not depend on one. The hook denies on unparseable input because agy skips a failing hook, which would let the call through.
 
 Observed startup behavior, 2026-11-13 and 2026-11-14: Claude Code started and answered with no prompt. Pi started and answered. agy in plan mode asked before every command; in auto mode it asked once to read a file outside the workspace, asked for trust once per new folder, and warned at startup that the sign-in lacks a permission. agy `--settings` rejects `$schema` and accepts `permissions.deny`.
 
@@ -134,6 +134,8 @@ Each harness is `Available` or `Blocked` for the orchestrator's session; the orc
 
 Whichever session the user steers is the orchestrator, in any harness. Delegation is flat and Herdr-only; every delegate works single-agent. Delegation is chosen by benefit versus briefing, coordination, and verification overhead, not task size. Ordinary tasks do not require a committee.
 
+Pending migration: `../git/design.md` replaces this shared-checkout wave with a git worktree per writer.
+
 Independent whole files or subtrees can have concurrent implementation delegates in one checkout without a jj workspace per worker. Before the wave, one integrator stages shared interfaces and assigns explicit writable and forbidden paths. Ownership is cooperative convention, not enforced locking or isolation.
 
 During the wave, delegates edit only assigned paths, run no jj commands (including snapshotting reads), Git mutations, or broad mutating commands, and test only independent inputs/output resources. The integrator owns shared files, manifests/lockfiles, snapshots/history organization, repo-wide formatting/codegen, and integrated tests, but avoids competing edits and history operations until the barrier.
@@ -161,7 +163,7 @@ Native subagents are disabled in every harness. Legacy Pi subagent model setting
 | `skills/operate/delegate/SKILL.md` | new; replaces `skills/operate/pi-delegate/SKILL.md` | R1, R2, R3, R6, R7 |
 | `AGENTS.md`, Delegation | name `delegate`; skip delegation when the prompt says "You are a delegate"; forbid agy subagents, workflows, and swarms | R4 |
 | `claude/delegate.json`, `agy/delegate.json` | deny lists for delegate tabs, passed with `--settings` | R4 |
-| `agy/plugins/no-subagents/` | `PreToolUse` hook plugin denying agy subagent tools | R4 |
+| `agy/plugins/no-subagents/` | `PreToolUse` hook plugin denying agy subagent tools except `invoke_subagent` with `TypeName` `browser` | R4 |
 | `install.sh`, `agy/README.md` | `agy` target linking `AGENTS.md`, `skills/`, and `plugins/no-subagents` into `~/.gemini/config/` without touching `hooks.json` | R1, R4 |
 | `skills/verify/interrogate`, `skills/design/arena`, `skills/learn/reflect` | a seat from another family through `delegate`, with a rule for no family left | R5, R6 |
 | `skills/understand/auto-research/SKILL.md` | three-engine fan-out and merge | R8 |

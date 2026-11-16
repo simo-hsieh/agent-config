@@ -9,16 +9,16 @@ Status: live, published at change pzsztlyw. Implements the `understand` decision
   Existing skills move: `understand/auto-research`, `verify/code-review`,
   `learn/evidence-learning-loop`, `operate/delegate`,
   `tools/{jj,agent-browser,notion-mcp}`.
-- **R1b Live install by symlink.** A second jj workspace at `~/.agents/src`
-  holds the accepted version. `install.sh` links every installed path into
-  it instead of copying: each skill flat as `~/.agents/skills/<skill>` and
-  `~/.claude/skills/<skill>`, plus AGENTS.md, rules, playbooks, agents, and Pi
-  config. It fails before linking if two intents hold the same skill name,
+- **R1b Live install by symlink.** `install.sh` publishes one git commit:
+  it exports the commit read-only to `~/.agents/releases/<sha>/` and renames
+  a symlink at `~/.agents/src` onto it. Installed paths link into
+  `~/.agents/src` instead of copying: each skill flat as
+  `~/.agents/skills/<skill>` and `~/.claude/skills/<skill>`, plus AGENTS.md,
+  rules, playbooks, agents, and Pi config. It fails before linking if two
+  intents hold the same skill name or the tree is dirty without `--rev`,
   backs up any non-link file it replaces, and removes dangling links that
-  point into `~/.agents/src`. Going live: `jj -R ~/.agents/src new <change>`
-  for a new accepted change; after rewriting the accepted change itself, the
-  stable workspace goes stale and keeps serving the old files until
-  `jj -R ~/.agents/src workspace update-stale`.
+  point into `~/.agents/src`. Rollback is `./install.sh --rev <commit>`.
+  Revised 2026-11-17 from a second jj workspace; see `../git/design.md`.
 - **R2 Investigation playbook.** `skills/playbooks/investigation/SKILL.md` routes each
   question to one leaf; the AGENTS.md `investigation` row points to it.
 - **R3 `how`.** Explains how code works and where things belong, for a target
@@ -31,7 +31,7 @@ Status: live, published at change pzsztlyw. Implements the `understand` decision
   `auto-research`.
 - **R7 `auto-research`.** External research only; its overnight loop moves to
   `skills/playbooks/long-run/SKILL.md`.
-- **R8 jj everywhere.** The AGENTS.md VCS rule changes from "never initialize
+- **R8 jj everywhere.** Superseded 2026-11-17 by `../git/design.md`. The AGENTS.md VCS rule changes from "never initialize
   or convert" to: in a git-only repo, run `jj git init` (colocated by default
   in jj 0.43) and work in jj, using git only for read-only commands.
 

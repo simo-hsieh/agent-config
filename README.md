@@ -22,7 +22,7 @@ pi/            subagent definitions, settings.json, runtime limits
 agy/           no-subagents hook plugin and delegate tab deny list
 models.md      model and effort per harness tier, task routing, evidence
 bin/           model-usage: per-model delegate stats from session logs
-install.sh     symlink installer into the stable workspace ~/.agents/src
+install.sh     publishes one git commit as ~/.agents/src and links harnesses to it
 ```
 
 Project-specific commands and conventions belong in each project's own `AGENTS.md`. Secrets and machine-local permissions do not belong here.
@@ -35,12 +35,11 @@ Project-specific commands and conventions belong in each project's own `AGENTS.m
 ./install.sh --with-settings pi
 ```
 
-The installer links each installed path into a second jj workspace at `~/.agents/src` (override with `AGENT_SRC`), so only the change checked out there is live; drafts in this working copy are not. It fails on duplicate skill names across intents, backs up any file it replaces under `${XDG_STATE_HOME:-~/.local/state}/agent-config-installer/backups/`, and removes only dangling links into `~/.agents/src`.
+Installing is publishing. `./install.sh` exports a commit with `git archive` into a read-only `~/.agents/releases/<sha>/`, then points `~/.agents/src` (override with `AGENT_SRC`) at it in one rename. Harness links point into `~/.agents/src`, so they never change. Only the commit last installed is live, and no edit is live until it is committed and installed. Without `--rev` the installer installs `HEAD` and refuses a dirty working tree; `--rev <commit>` installs any commit, which is also how to roll back. It fails on duplicate skill names across intents, backs up any file it replaces under `${XDG_STATE_HOME:-~/.local/state}/agent-config-installer/backups/`, and removes only dangling links into `~/.agents/src`.
 
 ```sh
-jj workspace add ~/.agents/src                  # once
-jj -R ~/.agents/src new <accepted-change>       # go live with a new accepted change
-jj -R ~/.agents/src workspace update-stale      # after rewriting the accepted change
+git commit -am "..." && ./install.sh   # go live with HEAD
+./install.sh --rev <older-commit>      # roll back
 ```
 
 | Source | Installed to |
