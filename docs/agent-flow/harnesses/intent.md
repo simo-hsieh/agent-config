@@ -11,7 +11,7 @@ Delegation reaches only Pi, through `pi-delegate`, and only from Claude Code. Ea
 1. Three harnesses, one per model family and paid subscription: Claude Code (Anthropic), Pi (OpenAI through the ChatGPT subscription), and agy (Google Antigravity).
 2. Each harness has a thinking tier and a fast tier, each a model and effort level, started in its own Herdr tab.
 3. Each task goes to the model that does that kind of task best, per a task-type reference backed by measured runs; when models are equal, to the subscription with more quota left.
-4. One `delegate` skill replaces `pi-delegate` and drives all three harnesses the same way. Group work in named outcome workspaces, start or safely reuse a delegate, send a brief, wait, and read a status-lined report. Keep finished tabs open by default; clean up accumulated idle tabs only after collecting results and confirming no pending work remains.
+4. One `delegate` skill replaces `pi-delegate` and drives all three harnesses the same way. Group work in named outcome workspaces, start a fresh delegate per task, send a brief, wait, and read a status-lined report that ends in a handover. Close each finished tab once its handover is collected, so open tabs show only live work.
 5. AGENTS.md and the shared skills behave correctly in every harness, both as orchestrator and as delegate.
 6. The user can watch and steer delegate work from a browser or phone through Claude Code Remote Control.
 7. Delegation keeps working when one or two subscriptions are out of quota: work moves to the harnesses that still have quota, and the user can continue from any harness's session.
@@ -37,7 +37,7 @@ Delegation reaches only Pi, through `pi-delegate`, and only from Claude Code. Ea
 
 ## Success criteria
 
-- From Claude Code, one task each to `claude-fast`, `pi-thinking`, and `agy-fast` returns a parseable report and leaves its tab open. Related work stays in its outcome workspace; conversation reuse requires a dependent follow-up, otherwise a verified reset or fresh agent.
+- From Claude Code, one task each to `claude-fast`, `pi-thinking`, and `agy-fast` returns a parseable report with a handover, and its tab is then closed. Related work stays in its outcome workspace; a live conversation continues only for an immediate dependent follow-up, otherwise the next task starts a fresh agent from the handover.
 - A delegate tab asked to start another Herdr agent refuses.
 - `arena` runs with three families and names the model behind each seat.
 - One frontend task through `arena` across the three thinking tiers records which family gets UI work.

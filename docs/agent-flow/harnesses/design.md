@@ -10,7 +10,7 @@ Delegated work runs on whichever of three model families does that kind of task 
 
 ### Requirements
 
-- R1. A `delegate` skill groups work in named outcome workspaces, starts or safely reuses delegate tabs, sends a brief, waits, and reads the report. Finished tabs remain open by default; accumulated idle tabs created by the orchestrator may be cleaned up after their results are collected.
+- R1. A `delegate` skill groups work in named outcome workspaces, starts a fresh delegate tab per task, sends a brief, waits, and reads the report and its handover. The orchestrator closes each tab it created once the handover is collected.
 - R2. Each harness has a thinking tier and a fast tier. Model IDs and efforts live only in `models.md`, except config files a harness reads directly, which `models.md` lists.
 - R3. Every report starts with `status: DONE | BLOCKED | FAILED`, then a `harness:` line with the harness, model, and effort, and a `task:` line naming its Task map row.
 - R4. A delegate tab knows it is a delegate and works single-agent in every harness. It does not start Herdr agents, native subagents, teams, workflows, or swarms and does not push, merge, open PRs, or move bookmarks. Herdr-only delegation is flat; outside Herdr, work stays in the main session.
@@ -27,7 +27,7 @@ Delegated work runs on whichever of three model families does that kind of task 
 
 ### Success criteria
 
-- From any harness, one task each to `claude-fast`, `pi-thinking`, and `agy-fast` returns a parseable report and leaves its tab open. Dependent follow-ups reuse their conversation; independent subtasks use verified clean conversations. A different substantial outcome gets a named workspace.
+- From any harness, one task each to `claude-fast`, `pi-thinking`, and `agy-fast` returns a parseable report with a handover, and the orchestrator then closes its tab. Only an immediate dependent follow-up continues a live conversation; other tasks start fresh agents from the handover. A different substantial outcome gets a named workspace.
 - A delegate tab asked to start another Herdr agent refuses.
 - With one harness's quota exhausted, a fast task reaches the next tab in its row without the user's help, and the user is told once.
 - `arena` runs with three families and names the model behind each seat.
@@ -74,14 +74,14 @@ Every task starts at the tier's default effort. After two failures it retries on
 
 A Herdr workspace groups one coherent outcome, which may span repositories and worktrees. Related work reuses that workspace; a different substantial outcome gets a named workspace. Small side questions stay in the current workspace. Workspace membership provides neither shared model context nor filesystem isolation.
 
-The `delegate` skill defines workspace discovery, compatible-agent checks, verified conversation resets, and staleness checks. Conversation reuse requires a dependent follow-up, not merely the same workspace label. A new workspace already supplies a shell pane; tab creation below is only needed for an additional agent.
+The `delegate` skill defines workspace discovery, handovers, and tab closing. Each task gets a fresh agent; an idle tab is closed rather than reset and reused, because every open tab is one more agent to trace. A new workspace already supplies a shell pane; tab creation below is only needed for an additional agent.
 
 ```sh
 herdr tab create --workspace "<outcome workspace id>" --cwd "<task cwd>" --label "<topic> [pi-fast]" --no-focus
 herdr agent start pi-fast --kind pi --pane <pane_id> -- <start arguments>
 herdr agent prompt pi-fast "<brief>" --wait --timeout 600000
 herdr agent read pi-fast --source recent-unwrapped --lines 200
-# Leave the finished tab open for follow-ups and reference.
+herdr tab close <tab_id>   # after keeping the report's handover
 ```
 
 Start arguments per harness; every flag appears in the CLI's `--help`:
@@ -98,7 +98,7 @@ Observed startup behavior, 2026-11-13 and 2026-11-14: Claude Code started and an
 
 ### Delegate contract
 
-The authoritative contract is in [`delegate`](../../../skills/operate/delegate/SKILL.md#contract) and applies to new and reused agents in every harness. It requires flat, single-agent work, explicit writable paths, integrator-owned shared mutations and history, independent tests/runtime resources, and a report after background mutating commands finish. The brief names the integrator, writable whole files/subtrees, forbidden paths, staged interfaces, allowed commands/tests, and runtime resources. Everything outside assigned writable paths is forbidden; a brief without writable paths is read-only.
+The authoritative contract is in [`delegate`](../../../skills/operate/delegate/SKILL.md#contract) and applies to every agent in every harness. It requires flat, single-agent work, explicit writable paths, integrator-owned shared mutations and history, independent tests/runtime resources, and a report after background mutating commands finish. The brief names the integrator, writable whole files/subtrees, forbidden paths, staged interfaces, allowed commands/tests, and runtime resources. Everything outside assigned writable paths is forbidden; a brief without writable paths is read-only.
 
 Without the delegate marker, a Claude delegate in a Herdr tab reads the AGENTS.md Delegation line, sees `HERDR_ENV=1`, and opens tabs of its own. The status line comes ahead of the `Playbook:` line AGENTS.md asks for, so the orchestrator can parse it. The brief holds the goal, exact files, steps, done-when, the Task map row, and the tab's harness, model, and effort.
 
@@ -107,7 +107,7 @@ The orchestrator:
 - On `agent_not_ready` or `blocked`, reads the pane and asks the user before answering a trust, approval, or sign-in prompt. It never adds an auto-approve flag.
 - On a timeout or stall, reads the pane before resending.
 - Treats each report as a claim and reruns the decisive command.
-- Leaves finished tabs open by default. When many idle tabs accumulate, closes only tabs it created after collecting reports, preserving handoff results, and confirming no commands or pending work remain. Workspace closure requires user approval.
+- Closes each tab it created once the report's handover is kept and no commands or pending work remain. A tab stays open only while its agent works, waits on the user, or is about to get a dependent follow-up. Workspace closure requires user approval.
 
 ### Quota
 
@@ -123,7 +123,7 @@ stateDiagram-v2
 
 Each harness is `Available` or `Blocked` for the orchestrator's session; the orchestrator owns this list and keeps it in its context. Events and rules:
 
-- A `status: BLOCKED` report naming quota, or a usage-limit, rate-limit, 429, or quota error in the pane, moves the harness to `Blocked`. The orchestrator leaves the tab open, records the reset time if the pane shows one, sends the same brief to the next eligible role in the same outcome workspace, and tells the user once.
+- A `status: BLOCKED` report naming quota, or a usage-limit, rate-limit, 429, or quota error in the pane, moves the harness to `Blocked`. The orchestrator records the reset time if the pane shows one, collects any partial work, closes the tab, sends the same brief with that partial work to the next eligible role in the same outcome workspace, and tells the user once.
 - A timeout or stall alone does not block a harness; the orchestrator reads the pane first.
 - Delegates never use native subagents to work around quota limits; the orchestrator follows the role map and cross-family requirements.
 - Never reroute inside an `auto-research` fan-out; the report names the missing engine (R8).
