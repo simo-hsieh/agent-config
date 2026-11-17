@@ -11,6 +11,7 @@ WITH_SETTINGS=0
 SELECTED=""
 STAMP=$(date +%Y%m%d-%H%M%S)
 BACKUP_ROOT=${XDG_STATE_HOME:-$HOME/.local/state}/agent-config-installer/backups/$STAMP-$$
+KEEP_BACKUPS=10
 
 usage() {
   cat <<'EOF'
@@ -23,7 +24,8 @@ installs HEAD and refuses uncommitted changes; --rev <older commit> rolls back.
 With no component arguments, installs all supported adapters.
 Full Pi settings are opt-in. Native subagent controls are always applied:
 merge Claude tool denies and remove Pi's subagent package, preserving other
-settings. Replaced files are backed up outside harness discovery directories.
+settings. Replaced files are backed up outside harness discovery directories;
+only the 10 newest timestamped backup runs are kept.
 EOF
 }
 
@@ -237,6 +239,18 @@ else:
 PY
 }
 
+# Run folders are named <YYYYMMDD-HHMMSS>-<pid>, so name order is age order;
+# folders named otherwise (e.g. manual-*) are left alone.
+prune_backups() {
+  dir=${BACKUP_ROOT%/*}
+  [ -d "$dir" ] || return 0
+  find "$dir" -mindepth 1 -maxdepth 1 -type d -name '[0-9]*-[0-9]*-[0-9]*' | sort -r |
+    tail -n +$((KEEP_BACKUPS + 1)) | while IFS= read -r old; do
+      note "prune  $old"
+      [ "$DRY_RUN" -eq 1 ] || { chmod -R u+w "$old" && rm -rf "$old"; }
+    done
+}
+
 # Retire only definitions and runtime links owned by this installer.
 retire_subagents() {
   dir=$1
@@ -290,4 +304,5 @@ if want agy; then
   prune_dangling "$HOME/.gemini/config/plugins"
 fi
 
+prune_backups
 note "Done. Restart active agent sessions to reload configuration."

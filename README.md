@@ -35,7 +35,7 @@ Project-specific commands and conventions belong in each project's own `AGENTS.m
 ./install.sh --with-settings pi
 ```
 
-Installing is publishing. `./install.sh` exports a commit with `git archive` into a read-only `~/.agents/releases/<sha>/`, then points `~/.agents/src` (override with `AGENT_SRC`) at it in one rename. Harness links point into `~/.agents/src`, so they never change. Only the commit last installed is live, and no edit is live until it is committed and installed. Without `--rev` the installer installs `HEAD` and refuses a dirty working tree; `--rev <commit>` installs any commit, which is also how to roll back. It fails on duplicate skill names across intents, backs up any file it replaces under `${XDG_STATE_HOME:-~/.local/state}/agent-config-installer/backups/`, and removes only dangling links into `~/.agents/src`.
+Installing is publishing. `./install.sh` exports a commit with `git archive` into a read-only `~/.agents/releases/<sha>/`, then points `~/.agents/src` (override with `AGENT_SRC`) at it in one rename. Harness links point into `~/.agents/src`, so they never change. Only the commit last installed is live, and no edit is live until it is committed and installed. Without `--rev` the installer installs `HEAD` and refuses a dirty working tree; `--rev <commit>` installs any commit, which is also how to roll back. It fails on duplicate skill names across intents, backs up any file it replaces under `${XDG_STATE_HOME:-~/.local/state}/agent-config-installer/backups/` (keeping the 10 newest timestamped runs and any other folder, such as `manual-*`), and removes only dangling links into `~/.agents/src`.
 
 ```sh
 git commit -am "..." && ./install.sh   # go live with HEAD
