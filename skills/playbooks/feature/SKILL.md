@@ -17,7 +17,7 @@ intent.md <-> design.md <-> code + tests
 `intent.md` and `design.md` live in the target project (for example `docs/<topic>/`) as committed records for future change, kept true to the shipped code. Write only the docs that reduce risk: a small, local, reversible change goes straight from the stated goal to code and tests. Stop for my approval only at a stage I name ("let's discuss the intent").
 
 1. **Intent** (`intent.md`): problem, desired outcome, affected users and systems, constraints, success criteria, open questions, in the requester's words.
-2. **Design** (`design.md`), for engineers who know the system; skip trivial background:
+2. **Design** (`design.md`), for engineers who know the system, in the shape of `~/.agents/skills/decision-doc/SKILL.md`; skip trivial background:
    - numbered requirements (R1, R2, ...) that satisfy the intent;
    - the approach, system diagram, and key components, as Mermaid;
    - detailed design: write 2–3 caller call sites first and derive the API or proto from them; screen it for two ways to do one task, importable internals, hand-synced lists, and split ownership; choose the data structure per `~/.agents/skills/model-the-domain/SKILL.md`;

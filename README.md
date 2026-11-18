@@ -9,7 +9,7 @@ skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   playbooks/   investigation, bugfix, feature, perf, ship, long-run (routed by AGENTS.md)
   understand/  how, why, recall, teach, auto-research
   clarify/     sharpen
-  design/      arena, model-the-domain, make-operations-idempotent
+  design/      arena, decision-doc, model-the-domain, make-operations-idempotent
   build/       tdd, typescript-best-practices
   verify/      code-review, blast-radius, interrogate, benchmark-checklist, statechart,
                create-/maintain-verification-skill, create-/maintain-formal-verification-skill
