@@ -17,12 +17,12 @@ Start every task at the default effort. After two failures, retry on the same mo
 
 ## Task map
 
-Which tab takes which kind of task (harnesses design, R7). The orchestrator finds the task's row and sends it to the first tab in the order. Tabs joined by `=` are equals: send to the one whose subscription has more quota left in `codexbar usage --format json`, or to the first if CodexBar is unavailable. On a quota `BLOCKED`, or a usage-limit error in the tab's pane, mark the harness blocked for the session and move to the next tab in the row (R6); with no tab left, the orchestrator does the task itself. `claude-fast` comes last in fast rows because it spends the orchestrator's quota. Tabs joined by `+` all get the same question at once, and the orchestrator merges their answers (harnesses design, R8).
+Which tab takes which kind of task (harnesses design, R7). The orchestrator finds the task's row and starts from the first tab in the order; it may pick another model when it has a reason, stated in the brief and the report. Tabs joined by `=` are equals: send to the one whose subscription has more quota left in `codexbar usage --format json`, or to the first if CodexBar is unavailable. On a quota `BLOCKED`, or a usage-limit error in the tab's pane, mark the harness blocked for the session and move to the next tab in the row (R6); with no tab left, the orchestrator does the task itself. `claude-fast` comes last in fast rows because it spends the orchestrator's quota. Tabs joined by `+` all get the same question at once, and the orchestrator merges their answers (harnesses design, R8).
 
 | Task type | Tier | Order | Basis |
 |---|---|---|---|
-| Design, hard bugs, final review | thinking | orchestrator itself | README, Models |
-| `arena`, `interrogate`, `reflect` seats | thinking | one seat per family other than the orchestrator's | R5 |
+| Design, hard bugs, and the main implementation | thinking | orchestrator itself | it needs the context behind its decisions (multi-agent intent, decision 3) |
+| Review of design, code quality, or security; `arena`, `interrogate`, `reflect` seats | thinking | one seat per family other than the orchestrator's | R5; multi-agent intent, decision 4 |
 | UI and frontend | thinking | `pi-thinking` = `agy-thinking` | unmeasured; plan step 5 decides |
 | Web research, one lookup | fast | `pi-fast` = `agy-fast`, then `claude-fast` | Hydrogen assumed equal to Sol |
 | Web research, several sources (`auto-research`) | fast | `pi-fast` + `agy-fast` + `claude-fast`, in parallel | each harness searches a different engine: Claude Code uses Brave, Pi uses OpenAI search through the ChatGPT subscription, agy uses Google |
@@ -30,7 +30,7 @@ Which tab takes which kind of task (harnesses design, R7). The orchestrator find
 | Well-specified edits, codemods | fast | `pi-fast` = `agy-fast`, then `claude-fast` | Sonnet 5.5 `high` scores below Sol `medium` at a higher cost; Hydrogen assumed equal to Sol |
 | Test runs, repros, benchmarks | fast | `pi-fast` = `agy-fast`, then `claude-fast` | Hydrogen assumed equal to Sol |
 
-A row's order changes only through the Review procedure: a model leads a row when it beats the others on that task type over at least 10 runs, or wins an `arena` run on a real task of that type.
+A row's default order changes through the Review procedure: a model leads a row when it beats the others on that task type over at least 10 runs, or wins an `arena` run on a real task of that type.
 
 ## Evidence
 

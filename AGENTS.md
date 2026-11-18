@@ -40,16 +40,16 @@ Read `~/.agents/rules/coding.md` before writing code.
 
 ## Version control
 
-- During shared-checkout write waves, no delegate, including readers, runs jj: even reads may snapshot. Only the integrator follows the jj workflow below, deferring snapshots/history until writers and background mutating commands stop.
 - In git-only repos, run `jj git init` (colocated); use jj and only read-only Git commands. Load the `jj` skill before editing or organizing changes.
 - Keep one coherent topic per change, independent topics as siblings, and only real dependencies stacked. Fold follow-ups into their topic; descriptions explain current intent, design, and contents. Ask before rewriting shared changes, moving bookmarks, or pushing.
 
 ## Delegation
 
-- Delegating is talking to another model. Use native subagents, Herdr tabs (`HERDR_ENV=1`, through the `delegate` skill), or another harness, whichever does the work best; any agent, including a delegate, may delegate. Prefer quality over saving cost.
+- Delegating is talking to another model; any agent, including a delegate, may delegate, and quality comes before saving cost. Delegate in a Herdr tab (`HERDR_ENV=1`, through the `delegate` skill) so I can watch and read the work; use a native subagent only when no tab fits.
+- Do the design and the main work yourself: you need the context behind your decisions. Hand off whole tasks with a clear boundary and target, such as research, a codemod, or a test run, not reading on your behalf.
 - Brief like a colleague: the goal, the context you have, done-when, the files you will touch, and a handover at the end that lets someone continue without your conversation.
-- A model from another family catches different mistakes, so prefer one for reviews and checks of your own work.
-- When several agents write in one checkout, follow the `delegate` coordination pattern: one integrator, separate files per writer, and no VCS snapshots until writers stop.
+- When the work is ready, ask a model from another family to review its design, code quality, or security; it catches different mistakes.
+- Each concurrent writer works in its own git worktree and branch, and one integrator merges them (`delegate`, Several writers at once).
 - Treat a delegate's report like any tool output: check the claim you build on.
 
 ## Safety

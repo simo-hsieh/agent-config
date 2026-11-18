@@ -10,7 +10,7 @@ Delegated work runs on whichever of three model families does that kind of task 
 
 ### Requirements
 
-- R1. A `delegate` skill groups work in named outcome workspaces, starts a fresh delegate tab per task, sends a brief, waits, and reads the report and its handover. The orchestrator closes each tab it created once the handover is collected.
+- R1. A `delegate` skill groups work in named outcome workspaces, starts a fresh delegate tab per task, sends a brief, waits, and reads the report and its handover. Finished tabs stay open, marked done, until the user closes them or the open-tab budget is reached.
 - R2. Each harness has a thinking tier and a fast tier. Model IDs and efforts live only in `models.md`, except config files a harness reads directly, which `models.md` lists.
 - R3. Every report starts with `status: DONE | BLOCKED | FAILED`, then a `harness:` line with the harness, model, and effort, and a `task:` line naming its Task map row.
 - R4. A delegate tab does not push, merge, open PRs, or move bookmarks. It may delegate further through native subagents, Herdr tabs, or another harness.
@@ -27,7 +27,7 @@ Delegated work runs on whichever of three model families does that kind of task 
 
 ### Success criteria
 
-- From any harness, one task each to `claude-fast`, `pi-thinking`, and `agy-fast` returns a parseable report with a handover, and the orchestrator then closes its tab. Only an immediate dependent follow-up continues a live conversation; other tasks start fresh agents from the handover. A different substantial outcome gets a named workspace.
+- From any harness, one task each to `claude-fast`, `pi-thinking`, and `agy-fast` returns a parseable report with a handover, and its tab stays open, marked done. Only an immediate dependent follow-up continues a live conversation; other tasks start fresh agents from the handover. A different substantial outcome gets a named workspace.
 - A delegate tab asked to start another Herdr agent refuses.
 - With one harness's quota exhausted, a fast task reaches the next tab in its row without the user's help, and the user is told once.
 - `arena` runs with three families and names the model behind each seat.
@@ -81,7 +81,7 @@ herdr tab create --workspace "<outcome workspace id>" --cwd "<task cwd>" --label
 herdr agent start pi-fast --kind pi --pane <pane_id> -- <start arguments>
 herdr agent prompt pi-fast "<brief>" --wait --timeout 600000
 herdr agent read pi-fast --source recent-unwrapped --lines 200
-herdr tab close <tab_id>   # after keeping the report's handover
+herdr tab rename <tab_id> "<topic> [pi-fast] done"   # stays open for the user
 ```
 
 Start arguments per harness; every flag appears in the CLI's `--help`:
@@ -105,7 +105,7 @@ The orchestrator:
 - On `agent_not_ready` or `blocked`, reads the pane and asks the user before answering a trust, approval, or sign-in prompt. It never adds an auto-approve flag.
 - On a timeout or stall, reads the pane before resending.
 - Treats each report as a claim and reruns the decisive command.
-- Closes each tab it created once the report's handover is kept and no commands or pending work remain. A tab stays open only while its agent works, waits on the user, or is about to get a dependent follow-up. Workspace closure requires user approval.
+- Leaves each finished tab open, marked done, once the report's handover is kept and no commands remain; the user closes it. When open delegate tabs reach the budget in `delegate` (10), it sends related work to a finished agent or closes its oldest finished tabs. Workspace closure requires user approval.
 
 ### Quota
 
@@ -121,7 +121,7 @@ stateDiagram-v2
 
 Each harness is `Available` or `Blocked` for the orchestrator's session; the orchestrator owns this list and keeps it in its context. Events and rules:
 
-- A `status: BLOCKED` report naming quota, or a usage-limit, rate-limit, 429, or quota error in the pane, moves the harness to `Blocked`. The orchestrator records the reset time if the pane shows one, collects any partial work, closes the tab, sends the same brief with that partial work to the next eligible role in the same outcome workspace, and tells the user once.
+- A `status: BLOCKED` report naming quota, or a usage-limit, rate-limit, 429, or quota error in the pane, moves the harness to `Blocked`. The orchestrator records the reset time if the pane shows one, collects any partial work, marks the tab quota-blocked, sends the same brief with that partial work to the next eligible role in the same outcome workspace, and tells the user once.
 - A timeout or stall alone does not block a harness; the orchestrator reads the pane first.
 - Never reroute inside an `auto-research` fan-out; the report names the missing engine (R8).
 - Never route a cross-family seat to the author's family; with no other family left, the skill reports the seat as skipped, for example "not interrogated".
@@ -129,17 +129,9 @@ Each harness is `Available` or `Blocked` for the orchestrator's session; the orc
 
 ### Orchestration
 
-Whichever session the user steers is the orchestrator, in any harness. Any agent may delegate, through native subagents, Herdr tabs, or another harness; quality comes before cost.
+Whichever session the user steers is the orchestrator, in any harness. It designs and builds the main work, hands off whole tasks with a clear boundary to Herdr tabs, and asks another family to review the result. Any agent may delegate; quality comes before cost (`../multi-agent/intent.md`).
 
-Pending migration: `../git/design.md` replaces this shared-checkout wave with a git worktree per writer.
-
-Independent whole files or subtrees can have concurrent implementation delegates in one checkout without a jj workspace per worker. Before the wave, one integrator stages shared interfaces and assigns explicit writable and forbidden paths. Ownership is cooperative convention, not enforced locking or isolation.
-
-During the wave, delegates edit only assigned paths, run no jj commands (including snapshotting reads), Git mutations, or broad mutating commands, and test only independent inputs/output resources. The integrator owns shared files, manifests/lockfiles, snapshots/history organization, repo-wide formatting/codegen, and integrated tests, but avoids competing edits and history operations until the barrier.
-
-At the barrier, the integrator confirms writers and background mutating commands stopped; Herdr `--wait` alone is not proof. It reviews diffs, resolves shared changes, formats/generates/tests together, revalidates relevant reader findings, and organizes coherent jj topics. Unexpected overlap stops affected writers while preserving edits; work is reassigned or serialized without auto-reverting someone else.
-
-Readers may run in parallel but can observe unfinished or stale state. Each shared app instance has one live driver; parallel drives require separate runtime resources.
+Each concurrent writer works in its own git worktree and branch, so writers never share a checkout. The integrator stages shared interfaces on the base, owns shared files, lockfiles, repo-wide formatting/codegen, and integrated tests, and merges each writer's branch once its handover is in and its background commands have finished; Herdr `--wait` alone is not proof. Parallel app drives need separate runtime resources.
 
 ### Research fan-out
 
@@ -147,7 +139,7 @@ Claude Code's web search runs on Brave (Anthropic subprocessor list; Simon Willi
 
 ### Native subagents
 
-Native subagents are allowed in every harness and suit work the current harness's models do well; Herdr tabs reach another harness or model family. The installer links the `claude/agents` and `pi/agents` definitions and removes the `Agent`, `Task`, and `TeamCreate` denies that earlier installs merged into `~/.claude/settings.json`.
+Native subagents are allowed in every harness but used only when no Herdr tab fits: their work is invisible to the user and has been lower quality than the orchestrator's own (user, 2026-11-19). Delegated work runs in Herdr tabs the user can watch. The installer links the `claude/agents` and `pi/agents` definitions and removes the `Agent`, `Task`, and `TeamCreate` denies that earlier installs merged into `~/.claude/settings.json`.
 
 ### Usage review
 

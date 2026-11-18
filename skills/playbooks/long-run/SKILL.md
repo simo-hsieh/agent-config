@@ -12,7 +12,7 @@ A unit advances by kind of run: **build**, the done predicate moved closer with 
    - done as a falsifiable predicate;
    - scope, quantified (units, rough effort, blockers found while grounding);
    - rigor, higher for one-way doors and wide blast radius;
-   - budget (default 6 h) and its cost: which harnesses and models run, and roughly how many delegated runs.
+   - budget (default 6 h) and team: which harnesses and models run in which roles, roughly how many delegated runs, and each writer's worktree; start without waiting for approval unless I name a gate.
 2. **Design the run**: atomic, independently landable units; the riskiest unknown first; the verification harness and a baseline captured before any change (numbers vetted per `~/.agents/skills/benchmark-checklist/SKILL.md`); every step safe to rerun after a crash per `~/.agents/skills/make-operations-idempotent/SKILL.md`.
    - Keep `worklist.md` beside `decisions.tsv` in the run's scratch directory. Record the predicate, budget and elapsed active-run time (excluding stopped time), and each unit's dependencies, done check, and status (`ready`, `blocked`, or `done` with evidence).
    - Block only on an unfinished prerequisite, external access or input you cannot obtain yourself, or a decision or approval AGENTS.md requires. Name the obstacle and what would unblock it; settle reversible technical choices yourself.

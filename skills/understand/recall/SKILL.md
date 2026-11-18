@@ -10,7 +10,7 @@ description: Briefs where my work on a topic stands, from my recent Claude Code 
    - Claude Code: `~/.claude/projects/<cwd with / and _ replaced by ->/*.jsonl`
    - Pi: `~/.pi/agent/sessions/--<cwd with / replaced by ->--/<ISO-time>_<id>.jsonl`
 
-   Order by modification time, grep the topic, read only matching regions, and skip the current session. With more than 3 matching sessions, give each subagent or `delegate` tab one read-only slice.
+   Order by modification time, grep the topic, read only matching regions, and skip the current session. With more than 3 matching sessions, give each `delegate` tab one read-only slice.
 3. **Verify** every thread against live `jj log` and `jj status`.
 4. **Brief:**
    - Capsule: at most 5 bullets.

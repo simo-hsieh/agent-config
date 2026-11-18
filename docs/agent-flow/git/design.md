@@ -35,10 +35,10 @@ Outside this change's writable paths, for the integrator:
 | File | Change |
 |---|---|
 | `AGENTS.md` Version control | Replace the three jj bullets with: git only; one topic per branch; worktree per concurrent writer; ask before rewriting shared branches or pushing. Playbook row `ship`: "finished topic branches". |
-| `AGENTS.md` Delegation | The shared-checkout bullet becomes: each concurrent writer gets its own worktree and branch, and the integrator merges them. |
+| `AGENTS.md` Delegation | Done 2026-11-19: each concurrent writer gets its own worktree and branch, and the integrator merges them. |
 | `skills/tools/jj/` | Delete. Add `skills/tools/git/SKILL.md` only if the Workflow section above is too long for AGENTS.md. |
 | `skills/playbooks/ship/SKILL.md` | Branches instead of bookmarks; fix CI in the owning commit with `--fixup` and autosquash; land bottom-up and restack with `--update-refs`; `patch-id` check per pstack Shipping. |
-| `skills/operate/delegate/SKILL.md` | The write wave becomes a worktree per writer. Drop "no jj commands" from "Several writers in one checkout"; keep "no Git mutations outside your worktree". |
+| `skills/operate/delegate/SKILL.md` | Done 2026-11-19: "Several writers at once" gives each writer a worktree. |
 | `skills/understand/why/SKILL.md` | `git blame`, `git log --follow -- <path>`, `git log -L`, and `git reflog` for reworked commits. |
 | `skills/understand/recall/SKILL.md` | Verify against `git status` and `git log`; status tags `[pushed <branch>]`, `[local <branch>]`, `[abandoned]`. |
 | `skills/playbooks/long-run`, `verify/interrogate`, `write/unslop`, `write/technical-writing`, `build/tdd`, `learn/correct`, `design/arena`, `understand/auto-research`, `verify/maintain-*-verification-skill` | Replace "jj change/topic/description" with "commit/branch/commit message"; arena seats use `git worktree`. |

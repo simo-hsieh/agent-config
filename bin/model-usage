@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Print delegate runs per harness, model, effort, and Task map row, for the models.md review.
 
-A run is a top-level session whose last assistant reply starts with a delegate
-status line. agy stores conversations as protobuf blobs with no published
+A run is a session, or a Claude Code subagent's log, whose last assistant reply
+starts with a delegate status line. agy stores conversations as protobuf blobs with no published
 schema, so agy runs are counted but not parsed.
 """
 import json
@@ -61,10 +61,11 @@ def run_from(harness: str, turns: list[dict]) -> Run | None:
     )
 
 
-def claude_turns(records: list[dict]) -> list[dict]:
+def claude_turns(records: list[dict], sidechain: bool = False) -> list[dict]:
+    """sidechain: read a subagent log, whose records all carry isSidechain."""
     turns = []
     for record in records:
-        if record.get("type") != "assistant" or record.get("isSidechain"):
+        if record.get("type") != "assistant" or bool(record.get("isSidechain")) != sidechain:
             continue
         message = record["message"]
         usage = message.get("usage") or {}
@@ -112,6 +113,8 @@ def collect(home: Path) -> tuple[list[Run], int]:
     runs = []
     sources = [
         ("claude", sorted(home.glob(".claude/projects/*/*.jsonl")), claude_turns),
+        ("claude subagent", sorted(home.glob(".claude/projects/*/*/subagents/*.jsonl")),
+         lambda records: claude_turns(records, sidechain=True)),
         ("pi", sorted(home.glob(".pi/agent/sessions/*/*.jsonl")), pi_turns),
     ]
     for harness, paths, turns_of in sources:

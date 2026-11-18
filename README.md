@@ -56,10 +56,10 @@ Settings are opt-in (`--with-settings`) because replacing them can disable local
 
 [`models.md`](models.md) holds the model and effort for each harness tier, which tab takes each task type, the evidence, and the review procedure. In short:
 
-- **Orchestrator:** the session you steer, normally Claude Code on Opus 5.5, does design, hard bugs, and final review. Opus is not allowed in Pi.
+- **Orchestrator:** the session you steer, normally Claude Code on Opus 5.5, designs and builds the main work, then asks another family to review its design, code quality, or security. Opus is not allowed in Pi.
 - **Delegates:** inside Herdr, the `delegate` skill runs `researcher` and `worker` work in a thinking or fast tab of Claude Code, Pi (GPT-6.1), or agy (Gemini 4), chosen by task type. Cross-family seats (`arena`, `interrogate`, `reflect`) take any family other than the author's.
 - **Out of quota:** a tab that hits a usage limit is marked blocked for the session and its work goes to the next tab in its Task map row; with every other harness blocked, the orchestrator does the work itself. When the orchestrator's own harness hits its limit, continue in a Pi or agy session; the same skills and `models.md` apply there.
-- **Coordination:** delegation is a conversation between models, guided by patterns rather than limits. Any agent may delegate, through native subagents, Herdr tabs, or another harness, and quality comes before cost. When several agents write in one checkout, one integrator owns shared files and history and writers keep to their own files; see [`delegate`](skills/operate/delegate/SKILL.md).
+- **Coordination:** delegation is a conversation between models, guided by patterns rather than limits. Any agent may delegate, in a Herdr tab you can watch (a native subagent only when no tab fits), and quality comes before cost. Each concurrent writer works in its own git worktree and branch, and one integrator merges them; see [`delegate`](skills/operate/delegate/SKILL.md).
 
 ```mermaid
 flowchart LR
