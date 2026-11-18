@@ -105,7 +105,7 @@ The orchestrator:
 - On `agent_not_ready` or `blocked`, reads the pane and asks the user before answering a trust, approval, or sign-in prompt. It never adds an auto-approve flag.
 - On a timeout or stall, reads the pane before resending.
 - Treats each report as a claim and reruns the decisive command.
-- Leaves each finished tab open, marked done, once the report's handover is kept and no commands remain; the user closes it. When open delegate tabs reach the budget in `delegate` (10), it sends related work to a finished agent or closes its oldest finished tabs. Workspace closure requires user approval.
+- Leaves each finished tab open, marked done, once the report's handover is kept and no commands remain; the user closes it. When a task is done, it offers to close the task's workspace; at 15 open delegate tabs it closes its oldest finished tabs. Workspace closure requires user approval.
 
 ### Quota
 

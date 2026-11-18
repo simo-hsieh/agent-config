@@ -46,9 +46,9 @@ Read `~/.agents/rules/coding.md` before writing code.
 ## Delegation
 
 - Delegating is talking to another model; any agent, including a delegate, may delegate, and quality comes before saving cost. Delegate in a Herdr tab (`HERDR_ENV=1`, through the `delegate` skill) so I can watch and read the work; use a native subagent only when no tab fits.
-- Do the design and the main work yourself: you need the context behind your decisions. Hand off whole tasks with a clear boundary and target, such as research, a codemod, or a test run, not reading on your behalf.
+- Do the design and the main work yourself: you need the context behind your decisions. For a design, first get independent drafts from three families (`models.md`, Design input), with fewer seats only when quota is nearly used up (`delegate`, Quota). Hand off whole tasks with a clear boundary and target, such as research, a codemod, or a test run, not reading on your behalf.
 - Brief like a colleague: the goal, the context you have, done-when, the files you will touch, and a handover at the end that lets someone continue without your conversation.
-- When the work is ready, ask a model from another family to review its design, code quality, or security; it catches different mistakes.
+- When the work is ready, ask at least one model from another family to review its design, code quality, or security, and both other families unless quota is nearly used up; each catches different mistakes.
 - Each concurrent writer works in its own git worktree and branch, and one integrator merges them (`delegate`, Several writers at once).
 - Treat a delegate's report like any tool output: check the claim you build on.
 

@@ -2,7 +2,9 @@
 """Print delegate runs per harness, model, effort, and Task map row, for the models.md review.
 
 A run is a session, or a Claude Code subagent's log, whose last assistant reply
-starts with a delegate status line. agy stores conversations as protobuf blobs with no published
+starts with a delegate status line. Launches are the `herdr agent start` calls in
+Claude Code and Pi orchestrator transcripts, counted per harness kind, including
+runs that never reported. agy stores conversations as protobuf blobs with no published
 schema, so agy runs are counted but not parsed.
 """
 import json
@@ -15,6 +17,7 @@ from pathlib import Path
 
 STATUS_LINE = re.compile(r"^status:\s*(DONE|BLOCKED|FAILED)\b", re.MULTILINE)
 TASK_LINE = re.compile(r"^task:\s*(.+)$", re.MULTILINE)
+LAUNCH = re.compile(r"herdr agent start\s+\S+.*?--kind\s+(\w+)", re.S)
 
 
 @dataclass(frozen=True)
@@ -143,12 +146,35 @@ def summarize(runs: list[Run]) -> list[tuple]:
     return rows
 
 
+def launches(home: Path) -> dict[str, int]:
+    """Count `herdr agent start` calls per --kind in shell commands the orchestrators ran."""
+    counts: dict[str, int] = {}
+    paths = sorted(home.glob(".claude/projects/*/*.jsonl")) + sorted(home.glob(".pi/agent/sessions/*/*.jsonl"))
+    for path in paths:
+        for record in read_jsonl(path):
+            content = (record.get("message") or {}).get("content")
+            if not isinstance(content, list):
+                continue
+            for part in content:
+                if not isinstance(part, dict):
+                    continue
+                args = part.get("input") if part.get("type") == "tool_use" else part.get("arguments") if part.get("type") == "toolCall" else None
+                command = args.get("command") if isinstance(args, dict) else None
+                if isinstance(command, str):
+                    for match in LAUNCH.finditer(command):
+                        counts[match.group(1)] = counts.get(match.group(1), 0) + 1
+    return counts
+
+
 def main() -> None:
     runs, agy_conversations = collect(Path.home())
     header = ("harness", "model", "effort", "task", "runs", "done", "median_min", "tokens_per_done")
     print("\t".join(header))
     for row in summarize(runs):
         print("\t".join(str(value) for value in row))
+    print("\nkind\tlaunches")
+    for kind, count in sorted(launches(Path.home()).items(), key=lambda item: -item[1]):
+        print(f"{kind}\t{count}")
     print(f"agy: {agy_conversations} conversations not parsed (protobuf blobs)", file=sys.stderr)
 
 

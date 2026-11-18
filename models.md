@@ -22,7 +22,8 @@ Which tab takes which kind of task (harnesses design, R7). The orchestrator find
 | Task type | Tier | Order | Basis |
 |---|---|---|---|
 | Design, hard bugs, and the main implementation | thinking | orchestrator itself | it needs the context behind its decisions (multi-agent intent, decision 3) |
-| Review of design, code quality, or security; `arena`, `interrogate`, `reflect` seats | thinking | one seat per family other than the orchestrator's | R5; multi-agent intent, decision 4 |
+| Design input | thinking | `claude-thinking` + `pi-thinking` + `agy-thinking`, in parallel; fewer seats only when quota is nearly used up | multi-agent intent, decision 13 |
+| Review of design, code quality, or security; `arena`, `interrogate`, `reflect` seats | thinking | at least one family other than the orchestrator's, both unless quota is nearly used up | R5; multi-agent intent, decision 4 |
 | UI and frontend | thinking | `pi-thinking` = `agy-thinking` | unmeasured; plan step 5 decides |
 | Web research, one lookup | fast | `pi-fast` = `agy-fast`, then `claude-fast` | Hydrogen assumed equal to Sol |
 | Web research, several sources (`auto-research`) | fast | `pi-fast` + `agy-fast` + `claude-fast`, in parallel | each harness searches a different engine: Claude Code uses Brave, Pi uses OpenAI search through the ChatGPT subscription, agy uses Google |

@@ -1,6 +1,6 @@
 # Intent: multi-agent settings
 
-Status: decided 2026-11-19, after the review on the Multi-Agent Decisions page (https://claude.ai/artifact/SHjBwcorhNLXDcbMCkWMDm). Decision numbers there are given as D#.
+Status: decided 2026-11-19 in two rounds on the Multi-Agent Decisions page (https://claude.ai/artifact/SHjBwcorhNLXDcbMCkWMDm). Decision numbers there are given as D#. Round 2 measured 55 delegate launches from Nov 13 to Nov 18: the new rules remove about 20–40% of them (reading for the orchestrator, most design committees), while finished tabs staying open raises the number open at once.
 
 ## Problem
 
@@ -11,18 +11,19 @@ Compared with pstack's poteto-mode, setup-pstack, and orchestrate, delegation he
 1. Any agent, a delegate included, may delegate. Guidance says how to work together, not when delegation is forbidden; quality comes before cost (D1).
 2. Delegated work runs in a Herdr tab, so I can watch it and read its context in the pane, for example a research task. A native subagent is used only when no tab fits: its work is invisible to me, and delegating to one has lowered the quality of the work (D11 note).
 3. The orchestrator, on the strongest model, designs and builds the main work itself, because it needs the context behind its decisions. It hands off whole tasks with a clear boundary and target, such as research, a codemod, or a test run, never reading on its own behalf to save context (D4, D6 notes).
-4. When the work is ready, the orchestrator asks a model from another family to review its design, code quality, or security. `arena` and `interrogate` keep their cross-family seats (D6, D10).
+4. When the work is ready, the orchestrator asks another family to review its design, code quality, or security (count in decision 13). `arena` and `interrogate` keep their cross-family seats (D6, D10).
 5. Each concurrent writer works in its own git worktree and branch, and one integrator merges them (D2, `../git/design.md`).
 6. No caps on depth, count, or concurrency, in policy or in Pi's subagent config; quota rerouting is the only bound (D3, D7).
 7. The Task map in `models.md` is the default route. The orchestrator may pick another model when it has a reason, stated in the brief and the report, so the next review can update the map (D5).
 8. Each harness has a thinking tier and a fast tier (`models.md`, Role map), starting at the tier's default effort; a task that fails twice is retried at the retry effort, then taken over by the orchestrator.
-9. A fresh agent per task, in the task's outcome workspace. A finished tab stays open, marked done, until I close it. When open delegate tabs reach 10, the orchestrator sends related work to a finished agent or closes its oldest finished tabs, and asks before closing a workspace (2026-11-19).
+9. A fresh agent for each new task, in the task's outcome workspace; follow-ups on a task, such as a re-review, go back to the agent that did it (D13). A finished tab stays open, marked done. When a task is done, the orchestrator offers to close its workspace; at 15 open delegate tabs it closes its oldest finished tabs (D12).
 10. A delegate's final reply carries `status:`, `harness:`, and `task:` lines and a handover; the rest is free (D9).
 11. `long-run` frames an agent-written team plan (roles, models, agent count, each writer's worktree) and starts without waiting for approval unless I name a gate (D8).
-12. `bin/model-usage` also counts Claude Code subagent runs, read from `~/.claude/projects/*/*/subagents/*.jsonl` (D11).
+12. `bin/model-usage` also counts Claude Code subagent runs, read from `~/.claude/projects/*/*/subagents/*.jsonl` (D11), and every `herdr agent start` launch from orchestrator transcripts (D17).
+13. A design starts from independent drafts by all three families' thinking tiers, which the orchestrator synthesizes and decides on (D15). Reviews use at least one other family, both unless quota is nearly used up (D14). Quota is nearly used up after a usage limit this session or under 20% left in `codexbar`.
+14. `how` and `recall` read in the orchestrator, not across delegate tabs (D16).
 
 ## Open questions
 
 1. Whether pi-subagents applies its own depth, spawn, or parallelism defaults when `pi/subagents.json` sets none (UNVERIFIED; the package is not installed on this Mac).
 2. A Pi-to-Claude seat through Herdr, end to end (UNVERIFIED; `herdr agent start --help` lists `claude`).
-3. Whether `how` and `recall`, which split reading across delegate tabs, keep enough context in the orchestrator under decision 3.

@@ -20,7 +20,7 @@ Logical roles are `claude-thinking`, `claude-fast`, `pi-thinking`, `pi-fast`, `a
 
 - Group substantial work by one coherent outcome, such as `Fix OAuth refresh race`, not by model or role. Keep small side questions in the current workspace.
 - Run `herdr workspace list` and `herdr tab list --workspace <id>`. Reuse a workspace for the same outcome; a matching label alone does not prove it is the same outcome. For a different substantial outcome, run `herdr workspace create --cwd "<task cwd>" --label "<outcome>" --no-focus` and retain `.result.workspace.workspace_id`, `.result.tab.tab_id`, and `.result.root_pane.pane_id`. Do not rename or repurpose unrelated workspaces.
-- Start a fresh agent per task. Send a follow-up to a live agent when it depends on that agent's conversation, such as a clarification or a fix to its own work; otherwise start a fresh agent and pass the handover into its brief.
+- Start a fresh agent for each new task. A follow-up on a task, such as a re-review, a clarification, or a fix to its own work, goes to the agent that did it, even after it finished; start fresh from its handover only when its conversation has drifted.
 
 ## Run a task
 
@@ -34,7 +34,7 @@ Logical roles are `claude-thinking`, `claude-fast`, `pi-thinking`, `pi-fast`, `a
 5. Read the reply. Pi: run `herdr agent get <name>` and read the last assistant message from its live `agent_session.value` when `agent_session.kind` is `path`. Claude Code and agy: `herdr agent read <name> --source recent-unwrapped --lines 200`. An idle tab is not a finished one: a delegate running its own subagents (agy especially) can go idle mid-task, so wait for the `status:` line.
 6. On `blocked`, `agent_blocked`, or `agent_not_ready` (trust, approval, or sign-in), read the pane and ask the user before answering it; never add an auto-approve flag. On a timeout or stall, read before resending.
 7. When the reply has a handover and no commands are still running, rename the tab `<topic> [<role>] done` and leave it open in its outcome workspace, so the user can read the work; the user closes it.
-8. Tab budget: when open delegate tabs across all workspaces (`herdr agent list`) reach 10, before starting another, send related work as a follow-up to a finished agent whose conversation helps; otherwise close the oldest finished tabs you created with `herdr tab close <tab_id>`, or ask before closing a workspace whose outcome is done. Never close tabs you did not create.
+8. When a task's work is done (its delegates have handed over and you have integrated the results), offer to close that task's workspace. If open delegate tabs across workspaces (`herdr agent list`) reach 15 first, close the oldest finished tabs you created with `herdr tab close <tab_id>`. Never close tabs you did not create; ask before closing a workspace.
 
 ## Report note
 
@@ -42,7 +42,9 @@ Logical roles are `claude-thinking`, `claude-fast`, `pi-thinking`, `pi-fast`, `a
 
 ## Quota
 
-Treat a harness as quota-blocked when its reply says `status: BLOCKED` for quota, or the pane shows a usage-limit, rate-limit, 429, or quota error. Record the reset time if shown, collect any partial work, rename the tab `<topic> [<role>] quota`, and send the same brief plus partial work to the next role in the row. Within an `auto-research` fan-out, do not reroute; name the missing engine. Tell the user once which harness is blocked and where its work went. When the orchestrator's own harness hits a limit, tell the user to continue in another harness's session.
+Treat a harness as quota-blocked when its reply says `status: BLOCKED` for quota, or the pane shows a usage-limit, rate-limit, 429, or quota error. Record the reset time if shown, collect any partial work, rename the tab `<topic> [<role>] quota`, and send the same brief plus partial work to the next role in the row. Within an `auto-research` fan-out, do not reroute; name the missing engine. Tell the user once which harness is blocked and where its work went.
+
+Quota is nearly used up for a harness that hit a usage limit this session, or whose subscription shows under 20% left in `codexbar usage --format json` where that command exists. Then run design input and reviews with fewer seats, keeping at least one other family, and say which seats were dropped. When the orchestrator's own harness hits a limit, tell the user to continue in another harness's session.
 
 ## Several writers at once
 
