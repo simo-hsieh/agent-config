@@ -64,7 +64,8 @@ Review when `pi --list-models`, `agy models`, or a Claude release adds a model, 
 2. Collect real-use numbers per model and effort from local session logs with `bin/model-usage`, which reads:
    - Claude Code: `~/.claude/projects/*/*.jsonl`, `message.model` and `message.usage` per assistant turn.
    - Pi: `~/.pi/agent/sessions/*/*.jsonl`, `model`, `thinkingLevel`, `usage`, `durationMs`, `stopReason` per assistant message.
-   - agy: `~/.gemini/antigravity-cli/conversations/*.db`; its `gen_metadata` and `steps` columns are protobuf blobs with no published schema, so the script only counts them; take agy outcomes from the reports the orchestrator read.
+   - agy: `~/.gemini/antigravity-cli/brain/*/.system_generated/logs/transcript_full.jsonl`, `model` (effort as its suffix), `input_tokens`, `output_tokens`, and `created_at` per `PLANNER_RESPONSE`.
+   - Launches: `herdr agent start` calls in Claude Code and Pi orchestrator transcripts, per harness kind.
    - Outcome and task type: the `status:` and `task:` lines of each delegate report in those logs.
 3. Reorder Task map rows from the per-task-type numbers. Replace a model when the candidate scores at least as high at no more cost per completed task on the benchmark, and its real-use DONE rate is no lower over at least 10 runs. When the benchmark and real use disagree, trial both in `arena` on one real task.
 4. Update this file and the pinned config files in one topic, with the evidence in the description, and set "Last reviewed".

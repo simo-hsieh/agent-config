@@ -152,8 +152,7 @@ Native subagents are allowed in every harness but used only when no Herdr tab fi
 | `skills/operate/delegate/SKILL.md` | new; replaces `skills/operate/pi-delegate/SKILL.md` | R1, R2, R3, R6, R7 |
 | `AGENTS.md`, Delegation | name `delegate`; skip delegation when the prompt says "You are a delegate"; forbid agy subagents, workflows, and swarms | R4 |
 | `claude/delegate.json`, `agy/delegate.json` | deny lists for delegate tabs, passed with `--settings` | R4 |
-| `agy/plugins/no-subagents/` | `PreToolUse` hook plugin denying agy subagent tools except `invoke_subagent` with `TypeName` `browser` | R4 |
-| `install.sh`, `agy/README.md` | `agy` target linking `AGENTS.md`, `skills/`, and `plugins/no-subagents` into `~/.gemini/config/` without touching `hooks.json` | R1, R4 |
+| `install.sh`, `agy/README.md` | `agy` target linking the agy instructions and `skills/` into `~/.gemini/config/` without touching `hooks.json` | R1 |
 | `skills/verify/interrogate`, `skills/design/arena`, `skills/learn/reflect` | a seat from another family through `delegate`, with a rule for no family left | R5, R6 |
 | `skills/understand/auto-research/SKILL.md` | three-engine fan-out and merge | R8 |
 | `pi/settings.json`, `pi/agents/researcher.md`, `pi/README.md` | subagents inherit the tab's model; record the OpenAI search provider | R2, R8 |
@@ -226,7 +225,3 @@ Step 3 ran on 2026-11-14 from the repo paths, one fast tab per harness. Each tab
 
 - agy sign-in: the permission warning was still present on 2026-11-14. Clear it with `/logout` and a new sign-in before step 3. Owner: user.
 - agy paths: decide whether delegate tabs pass `--add-dir` for paths outside the workspace or keep agy to the workspace. Owner: user.
-- Search engines: `~/.pi/web-search.json` pins `"provider": "brave"` today, so two of the three seats search the same index until it changes. Owner: user, since the file is machine-local.
-- Claude delegate tabs run in auto mode; `claude/delegate.json` is their only push guard.
-- agy shell commands fail in delegate tabs: the shell from `/nix/store` cannot load `libpcre2-8.0.dylib` because agy's file-system sandbox blocks `/nix/store` (step 3). File reads work. Fix by allowing `/nix/store` reads in agy's sandbox or giving agy a system shell. Owner: user, since it changes a security setting.
-- `bin/model-usage` cannot read agy's conversation blobs, which are protobuf with no published schema; agy outcomes come from the reports the orchestrator read.

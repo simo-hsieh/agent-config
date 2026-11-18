@@ -2,10 +2,10 @@
 """Print delegate runs per harness, model, effort, and Task map row, for the models.md review.
 
 A run is a session, or a Claude Code subagent's log, whose last assistant reply
-starts with a delegate status line. Launches are the `herdr agent start` calls in
+starts with a delegate status line; agy runs come from its JSONL transcripts under
+~/.gemini/antigravity-cli/brain/. Launches are the `herdr agent start` calls in
 Claude Code and Pi orchestrator transcripts, counted per harness kind, including
-runs that never reported. agy stores conversations as protobuf blobs with no published
-schema, so agy runs are counted but not parsed.
+runs that never reported.
 """
 import json
 import re
@@ -99,6 +99,25 @@ def pi_turns(records: list[dict]) -> list[dict]:
     return [turn for turn in turns if turn["text"]] or turns
 
 
+def agy_turns(records: list[dict]) -> list[dict]:
+    """agy model IDs carry the effort as a suffix, such as gemini-4-carbon-medium."""
+    turns = []
+    for record in records:
+        if record.get("type") != "PLANNER_RESPONSE":
+            continue
+        model = record.get("model", "?")
+        base, _, suffix = model.rpartition("-")
+        effort = suffix if suffix in ("low", "medium", "high", "xhigh") else None
+        turns.append({
+            "text": record.get("content") or "",
+            "model": base if effort else model,
+            "effort": effort,
+            "tokens": record.get("input_tokens", 0) + record.get("output_tokens", 0),  # input excludes cache reads
+            "time": timestamp_seconds(record["created_at"]),
+        })
+    return [turn for turn in turns if turn["text"]] or turns
+
+
 def read_jsonl(path: Path) -> list[dict]:
     records = []
     bad_lines = 0
@@ -112,21 +131,21 @@ def read_jsonl(path: Path) -> list[dict]:
     return records
 
 
-def collect(home: Path) -> tuple[list[Run], int]:
+def collect(home: Path) -> list[Run]:
     runs = []
     sources = [
         ("claude", sorted(home.glob(".claude/projects/*/*.jsonl")), claude_turns),
         ("claude subagent", sorted(home.glob(".claude/projects/*/*/subagents/*.jsonl")),
          lambda records: claude_turns(records, sidechain=True)),
         ("pi", sorted(home.glob(".pi/agent/sessions/*/*.jsonl")), pi_turns),
+        ("agy", sorted(home.glob(".gemini/antigravity-cli/brain/*/.system_generated/logs/transcript_full.jsonl")), agy_turns),
     ]
     for harness, paths, turns_of in sources:
         for path in paths:
             run = run_from(harness, turns_of(read_jsonl(path)))
             if run:
                 runs.append(run)
-    agy_conversations = len(list(home.glob(".gemini/antigravity-cli/conversations/*.db")))
-    return runs, agy_conversations
+    return runs
 
 
 def summarize(runs: list[Run]) -> list[tuple]:
@@ -167,7 +186,7 @@ def launches(home: Path) -> dict[str, int]:
 
 
 def main() -> None:
-    runs, agy_conversations = collect(Path.home())
+    runs = collect(Path.home())
     header = ("harness", "model", "effort", "task", "runs", "done", "median_min", "tokens_per_done")
     print("\t".join(header))
     for row in summarize(runs):
@@ -175,7 +194,6 @@ def main() -> None:
     print("\nkind\tlaunches")
     for kind, count in sorted(launches(Path.home()).items(), key=lambda item: -item[1]):
         print(f"{kind}\t{count}")
-    print(f"agy: {agy_conversations} conversations not parsed (protobuf blobs)", file=sys.stderr)
 
 
 if __name__ == "__main__":
