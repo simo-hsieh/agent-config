@@ -1,6 +1,6 @@
 ---
 name: technical-writing
-description: Standard for docs, READMEs, design docs, PR text, and jj descriptions. Loaded by path together with unslop when writing them.
+description: Standard for docs, READMEs, design docs, PR text, and commit messages. Loaded by path together with unslop when writing them.
 disable-model-invocation: true
 ---
 

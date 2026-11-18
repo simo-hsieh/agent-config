@@ -22,4 +22,4 @@ Never change a test to match a wrong implementation, and never weaken an asserti
 
 ## Record
 
-Keep the test and the code in one jj topic. Its description and the report give the failing-before run and the passing-after run, or why a failing test was impractical.
+Keep the test and the code in one topic branch. Its commit message and the report give the failing-before run and the passing-after run, or why a failing test was impractical.

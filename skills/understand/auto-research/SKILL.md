@@ -19,4 +19,4 @@ Findings with sources (`file:line`, URL with access date), UNVERIFIED marks, and
 
 ## Saving
 
-Save only deep runs or on request: a repo-tied report goes in that repo's docs, any other in `~/notes/research/<YYYY-MM-DD>-<topic>.md`. The header records the date, question, sources, and, when repo-tied, the jj change it was based on. A saved report is dated evidence: live code and newer evidence override it, and a `design.md` that relies on it restates the decision and cites it.
+Save only deep runs or on request: a repo-tied report goes in that repo's docs, any other in `~/notes/research/<YYYY-MM-DD>-<topic>.md`. The header records the date, question, sources, and, when repo-tied, the commit it was based on. A saved report is dated evidence: live code and newer evidence override it, and a `design.md` that relies on it restates the decision and cites it.

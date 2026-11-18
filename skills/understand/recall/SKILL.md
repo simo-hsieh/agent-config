@@ -1,6 +1,6 @@
 ---
 name: recall
-description: Briefs where my work on a topic stands, from my recent Claude Code and Pi session transcripts plus jj state. Use before starting or resuming a topic, or for "what was I doing on X", "where did we leave X". Read-only.
+description: Briefs where my work on a topic stands, from my recent Claude Code and Pi session transcripts plus git state. Use before starting or resuming a topic, or for "what was I doing on X", "where did we leave X". Read-only.
 ---
 
 # Recall
@@ -11,9 +11,9 @@ description: Briefs where my work on a topic stands, from my recent Claude Code 
    - Pi: `~/.pi/agent/sessions/--<cwd with / replaced by ->--/<ISO-time>_<id>.jsonl`
 
    Order by modification time, grep the topic, read only matching regions, and skip the current session. With many matching sessions, read them newest first.
-3. **Verify** every thread against live `jj log` and `jj status`.
+3. **Verify** every thread against live `git status`, `git log`, and `git branch -vv`.
 4. **Brief:**
    - Capsule: at most 5 bullets.
-   - Threads, each tagged `[pushed <bookmark>]`, `[local <change-id>]`, `[abandoned]`, or `[planned]`.
+   - Threads, each tagged `[pushed <branch>]`, `[local <branch>]`, `[abandoned]`, or `[planned]`.
    - Problems: at most 5, including reverted attempts.
    - Next move: one action.

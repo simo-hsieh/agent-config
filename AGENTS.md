@@ -19,13 +19,13 @@ Defaults for all projects. Repository instructions and the user's current reques
 
 ## Playbooks
 
-Pick the first that fits and name it on the first line of your reply (`Playbook: <name>`):
+Pick the first that fits and name it on the first line of your reply (`Playbook: <name>`), after any report header a brief asks for:
 
 | Playbook | Use when |
 |---|---|
 | `bugfix` | a failing test, crash, wrong behavior, or small behavior-preserving refactor: read `~/.agents/skills/bugfix/SKILL.md` |
 | `perf` | a measured slowness or resource problem: read `~/.agents/skills/perf/SKILL.md` |
-| `ship` | turning finished jj topics into pull requests or landing them: read `~/.agents/skills/ship/SKILL.md` |
+| `ship` | turning finished topic branches into pull requests or landing them: read `~/.agents/skills/ship/SKILL.md` |
 | `long-run` | long or unattended work: a migration, a multi-part change, or research or optimization over hours: read `~/.agents/skills/long-run/SKILL.md` |
 | `feature` | new behavior, a new interface, a cross-module change, or a design doc: read `~/.agents/skills/feature/SKILL.md` |
 | `investigation` | a question about code, a decision, or prior work, or an unclear request: read `~/.agents/skills/investigation/SKILL.md` |
@@ -40,8 +40,8 @@ Read `~/.agents/rules/coding.md` before writing code.
 
 ## Version control
 
-- In git-only repos, run `jj git init` (colocated); use jj and only read-only Git commands. Load the `jj` skill before editing or organizing changes.
-- Keep one coherent topic per change, independent topics as siblings, and only real dependencies stacked. Fold follow-ups into their topic; descriptions explain current intent, design, and contents. Ask before rewriting shared changes, moving bookmarks, or pushing.
+- Use git. Keep one coherent topic per branch, off trunk; independent topics are sibling branches, and a branch stacks on another only when it needs that code. Fold follow-ups into their topic with `git commit --fixup=<sha>` and `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>`; messages explain intent, design, and contents.
+- Ask before rewriting a shared branch or pushing. Recover with `git reflog`.
 
 ## Delegation
 

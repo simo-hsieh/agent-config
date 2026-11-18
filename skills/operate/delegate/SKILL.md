@@ -38,7 +38,7 @@ Logical roles are `claude-thinking`, `claude-fast`, `pi-thinking`, `pi-fast`, `a
 
 ## Report note
 
-"Start your final reply with `status: DONE | BLOCKED | FAILED` (BLOCKED with the reason, `quota` for a usage limit), then `harness: <name> <model> <effort>` and `task: <Task map row>`. Say what you changed or ran, with real output, and anything unexpected. Finish background commands you started before replying. End with a `handover:` a fresh agent could continue from: changed paths, state left behind, open questions, and the next step. Commit only on your own branch. Do not push, merge, open PRs, or move bookmarks."
+"Start your final reply with `status: DONE | BLOCKED | FAILED` (BLOCKED with the reason, `quota` for a usage limit), then `harness: <name> <model> <effort>` and `task: <Task map row>`. Say what you changed or ran, with real output, and anything unexpected. Finish background commands you started before replying. End with a `handover:` a fresh agent could continue from: changed paths, state left behind, open questions, and the next step. Commit only on your own branch. Do not push, merge, open PRs, or move other branches."
 
 ## Quota
 

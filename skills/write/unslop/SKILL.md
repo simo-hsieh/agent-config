@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Removes AI writing patterns from durable text. Loaded by path when writing or editing docs, PR text, jj descriptions, or skills.
+description: Removes AI writing patterns from durable text. Loaded by path when writing or editing docs, PR text, commit messages, or skills.
 disable-model-invocation: true
 ---
 

@@ -16,7 +16,7 @@ skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   write/       unslop, technical-writing, ketchup, bro
   learn/       evidence-learning-loop, reflect, correct
   operate/     delegate
-  tools/       jj, agent-browser, notion-mcp
+  tools/       agent-browser, notion-mcp
 claude/        harness.md, subagent definitions, delegate tab deny list
 pi/            harness.md, subagent definitions, settings.json, subagent runtime config
 agy/           harness.md, delegate tab deny list

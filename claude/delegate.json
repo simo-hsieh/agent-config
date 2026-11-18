@@ -2,10 +2,8 @@
   "permissions": {
     "deny": [
       "Bash(git push:*)",
-      "Bash(jj git push:*)",
       "Bash(gh pr create:*)",
-      "Bash(gh pr merge:*)",
-      "Bash(jj bookmark:*)"
+      "Bash(gh pr merge:*)"
     ]
   }
 }

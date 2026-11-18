@@ -7,7 +7,7 @@ disable-model-invocation: true
 # Arena
 
 1. **Frame.** State the artifact both candidates produce and write a rubric of 3–6 gradeable criteria. Only you see the rubric; candidates see the task.
-2. **Fan out.** Run two candidates from different model families, each on its family's thinking tier through `delegate` (outside Herdr, ask the user to start independent main sessions from two families), on the same task and grounding, each in its own jj workspace (`jj workspace add`) or scratch directory. Tell each to produce its best version, not a hedge, and to name the alternatives it rejected.
+2. **Fan out.** Run two candidates from different model families, each on its family's thinking tier through `delegate` (outside Herdr, ask the user to start independent main sessions from two families), on the same task and grounding, each in its own git worktree (`git worktree add <path> -b <topic> <base>`) or scratch directory. Tell each to produce its best version, not a hedge, and to name the alternatives it rejected.
    If only one family has quota left, stop and report that arena needs a second family.
 3. **Judge.** A read-only judge through `delegate` inside Herdr, or a user-started main session outside Herdr, from a family that does not synthesize, the third family when it has quota, scores each candidate against the rubric and recommends a base.
 4. **Pick.** Read both candidates in full and score them yourself, criterion by criterion. If you and the judge disagree, reread both rationales before deciding. On a tie, prefer the smaller interface or cleaner boundary.

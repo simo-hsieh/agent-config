@@ -16,4 +16,4 @@ Edit only the verification skill's own directory. A behavior the map describes t
 4. **Reconcile**: merge recipes into as few app states as practical; spot-check cited drift; require a concrete source path before calling a surface missing from the map.
 5. **Live pass**, required even when source looks clean: you drive, following the skill's launch model. Assign only one live driver to each shared app instance; parallel drives require separate runtime resources, not merely separate Herdr tabs. Exercise every feature once. Run doctor before the first drive and after anything surprising. Keep captured evidence through every cleanup. Clean up whatever a drive started. A feature is unreachable only with its concrete prerequisite named.
 6. **Triage**: wrong description is doc drift (fix it); working behavior the harness can't drive is a harness gap (fix it, then re-drive); broken app behavior is a product gap (report it, keep it out of this change).
-7. **Ship or stop**: for changed, one jj change of proven corrections. Keep run notes in scratch, uncommitted.
+7. **Ship or stop**: for changed, one commit of proven corrections. Keep run notes in scratch, uncommitted.

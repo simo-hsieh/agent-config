@@ -14,7 +14,7 @@ Assume every contributor is an agent that sees only the files it opened, copies 
    2. types, so the bad state can't be written; otherwise a lint or CI check whose error names what to use instead (on a common pattern, fail only when a change adds more);
    3. a behavior test;
    4. docs or agent rules, only for judgment calls.
-3. **Prove** each new check fails on a real past mistake, and runs the same locally and in CI. One jj change per class. An exception sits on the offending line with a reason, an expiry date, and my approval.
+3. **Prove** each new check fails on a real past mistake, and runs the same locally and in CI. One commit per class. An exception sits on the offending line with a reason, an expiry date, and my approval.
 4. **Keep a rule table** in the project's agent instruction file pairing each rule with what enforces it. A repeated mistake whose rule nothing enforces gets fixed at a higher level in the same change. Drop a rule once its mistake can't happen.
 
 Report each class with its evidence, the level chosen, and why a higher level didn't work.

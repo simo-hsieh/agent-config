@@ -1,6 +1,6 @@
 # Design: git instead of jj
 
-Status: decided 2026-11-17; `install.sh`, `README.md`, and `docs/` done; the files in Migration wait for the integrator. Supersedes R8 "jj everywhere" in `../understand/design.md`.
+Status: decided 2026-11-17; Migration applied 2026-11-19 except the repository conversion steps. Supersedes R8 "jj everywhere" in `../understand/design.md`.
 
 ## Why
 
