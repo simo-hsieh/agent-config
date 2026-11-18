@@ -2,9 +2,7 @@
   "defaultThinkingLevel": "medium",
   "packages": [
     {
-      "source": "git:github.com/nicobailon/pi-web-access@f0c0a96a8f19198e767cbec2e447f38779ccca50",
-      "extensions": [],
-      "skills": []
+      "source": "git:github.com/nicobailon/pi-web-access@f0c0a96a8f19198e767cbec2e447f38779ccca50"
     }
   ],
   "theme": "dark",
