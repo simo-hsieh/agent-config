@@ -22,9 +22,9 @@ $AGENT_SRC (default ~/.agents/src) at that export, and links installed paths
 into $AGENT_SRC. Only the commit last installed is live. Without --rev it
 installs HEAD and refuses uncommitted changes; --rev <older commit> rolls back.
 With no component arguments, installs all supported adapters.
-Full Pi settings are opt-in. Subagent definitions are linked, and Agent, Task,
-and TeamCreate denies left by earlier installs are removed from Claude settings,
-preserving other settings. Replaced files are backed up outside harness discovery directories;
+Full Pi settings are opt-in. Subagent definitions are linked. Claude and agy
+settings get managed fields merged in (push and merge denies; agy's default
+model), preserving all other settings. Replaced files are backed up outside harness discovery directories;
 only the 10 newest timestamped backup runs are kept.
 EOF
 }
@@ -216,39 +216,49 @@ os.replace(staged, src)
 ' "$RELEASE" "$SRC"
 }
 
-# Remove the subagent tool denies earlier installs merged in; leave every other
-# machine-local permission and hook alone.
-allow_subagents() {
-  dst=$1
+# Merge the managed fields into a harness's machine-local settings, leaving every
+# other permission, hook, and preference alone (decisions H5 and H6, 2026-11-19):
+# claude: deny git push and gh pr merge; drop the subagent denies older installs added.
+# agy: the same denies, and the models.md thinking tier as the default model.
+merge_settings() {
+  kind=$1
+  dst=$2
   [ -f "$dst" ] || return 0
-  note "check  $dst (allow native subagents)"
-  python3 - "$dst" "$BACKUP_ROOT" "$DRY_RUN" <<'PY'
+  note "check  $dst (managed fields)"
+  python3 - "$kind" "$dst" "$BACKUP_ROOT" "$DRY_RUN" <<'PY'
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 
-filename, backup_root, dry_run = sys.argv[1:]
+kind, filename, backup_root, dry_run = sys.argv[1:]
 path = Path(filename)
 config = json.loads(path.read_text())
 before = json.dumps(config, sort_keys=True)
-deny = config.get("permissions", {}).get("deny")
-if deny is not None:
-    config["permissions"]["deny"] = [t for t in deny if t not in ("Agent", "Task", "TeamCreate")]
-if before == json.dumps(config, sort_keys=True):
-    print(f"ok     {path} (subagents allowed)")
+deny = config.setdefault("permissions", {}).setdefault("deny", [])
+if kind == "claude":
+    deny[:] = [t for t in deny if t not in ("Agent", "Task", "TeamCreate")]
+    wanted = ["Bash(git push:*)", "Bash(gh pr merge:*)"]
 else:
-    print(f"update {path} (subagents allowed)")
+    config["model"] = "Gemini 4 Carbon (Medium)"
+    wanted = ["command(git push)", "command(gh pr merge)"]
+deny.extend(t for t in wanted if t not in deny)
+if before == json.dumps(config, sort_keys=True):
+    print(f"ok     {path} (managed fields)")
+else:
+    print(f"update {path} (managed fields)")
     if dry_run != "1":
-        if path.exists() or path.is_symlink():
-            backup = Path(backup_root) / path.relative_to(Path.home())
-            backup.parent.mkdir(parents=True, exist_ok=True)
-            while backup.exists() or backup.is_symlink():
-                backup = backup.with_name(backup.name + "-next")
-            print(f"backup {path} -> {backup}")
-            os.rename(path, backup)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(config, indent=2) + "\n")
+        backup = Path(backup_root) / path.relative_to(Path.home())
+        backup.parent.mkdir(parents=True, exist_ok=True)
+        while backup.exists() or backup.is_symlink():
+            backup = backup.with_name(backup.name + "-next")
+        print(f"backup {path} -> {backup}")
+        shutil.copy2(path, backup)
+        staged = path.with_name(path.name + ".new")
+        staged.write_text(json.dumps(config, indent=2) + "\n")
+        os.chmod(staged, path.stat().st_mode & 0o777)
+        os.replace(staged, path)
 PY
 }
 
@@ -289,7 +299,7 @@ if want claude; then
   link_skills "$HOME/.claude/skills"
   prune_dangling "$HOME/.claude/skills"
   link_agents claude/agents "$HOME/.claude/agents"
-  allow_subagents "$HOME/.claude/settings.json"
+  merge_settings claude "$HOME/.claude/settings.json"
 fi
 
 if want pi; then
@@ -310,6 +320,7 @@ if want agy; then
     link_item "agy/plugins/${plugin##*/}" "$HOME/.gemini/config/plugins/${plugin##*/}"
   done
   prune_dangling "$HOME/.gemini/config/plugins"
+  merge_settings agy "$HOME/.gemini/antigravity-cli/settings.json"
 fi
 
 prune_backups

@@ -3,7 +3,9 @@
     "deny": [
       "command(git push)",
       "command(gh pr create)",
-      "command(gh pr merge)"
+      "command(gh pr merge)",
+      "command(git merge)",
+      "command(git branch -f)"
     ]
   }
 }
