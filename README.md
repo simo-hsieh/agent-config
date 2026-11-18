@@ -1,9 +1,10 @@
 # Personal agent configuration
 
-Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `AGENTS.md` is the always-on instruction file; everything else loads on demand. Claude Code, Pi, and Antigravity (`agy`) are thin adapters.
+Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `shared/AGENTS.md` holds the always-on rules every harness follows; each adapter adds a short `<harness>/harness.md`, and the installer joins the two into that harness's instructions file. Everything else loads on demand. Claude Code, Pi, and Antigravity (`agy`) are thin adapters.
 
 ```text
-AGENTS.md      always-on defaults: communication, scope, playbook routing, delegation, safety
+shared/        AGENTS.md: always-on rules for every harness (communication, scope, playbooks, git, delegation, safety)
+AGENTS.md      conventions for working in this repo only
 rules/         coding — read by the agent before writing code
 skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   playbooks/   investigation, bugfix, feature, perf, ship, long-run (routed by AGENTS.md)

@@ -174,20 +174,25 @@ export_release() {
   fi
 }
 
-# Each harness reads the shared AGENTS.md followed by its own <harness>/harness.md,
-# joined into build/<harness>.md inside the release.
+# Each harness reads the shared rules followed by its own <harness>/harness.md,
+# joined into build/<harness>.md inside the release. The shared rules live in
+# shared/AGENTS.md (the repo-root AGENTS.md before 2026-11-19).
 build_instructions() {
+  shared=$LIST/shared/AGENTS.md
+  [ -f "$shared" ] || shared=$LIST/AGENTS.md
   mkdir "$LIST/build"
   for harness in claude pi agy; do
     [ -f "$LIST/$harness/harness.md" ] || continue
-    { cat "$LIST/AGENTS.md"; printf '\n'; cat "$LIST/$harness/harness.md"; } > "$LIST/build/$harness.md"
+    { cat "$shared"; printf '\n'; cat "$LIST/$harness/harness.md"; } > "$LIST/build/$harness.md"
   done
 }
 
 # Prints the release path of a harness's instructions; releases older than the
 # per-harness files fall back to the shared AGENTS.md.
 instructions() {
-  if [ -f "$LIST/build/$1.md" ]; then echo "build/$1.md"; else echo AGENTS.md; fi
+  if [ -f "$LIST/build/$1.md" ]; then echo "build/$1.md"
+  elif [ -f "$LIST/shared/AGENTS.md" ]; then echo shared/AGENTS.md
+  else echo AGENTS.md; fi
 }
 
 # Swaps the live link in one rename, so readers see the old or new release, never a mix.
