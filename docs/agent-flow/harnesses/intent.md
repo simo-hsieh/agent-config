@@ -19,8 +19,7 @@ Delegation reaches only Pi, through `pi-delegate`, and only from Claude Code. Ea
 ## Constraints
 
 - Delegates never push, merge, open PRs, or move bookmarks.
-- Delegation is flat and Herdr-only. A delegate never starts another agent or uses native subagents, teams, workflows, or swarms in any harness. Outside Herdr, work stays in the main session.
-- Delegation depends on benefit versus overhead, not a large-task threshold; ordinary tasks need no committee.
+- Delegation is communication between models, guided by patterns rather than limits. Any agent, including a delegate, may use native subagents, Herdr tabs, or another harness, and quality comes before cost (decided 2026-11-18: with capable models, the old flat, Herdr-only, benefit-versus-overhead rules blocked useful work).
 - Pending migration: `../git/design.md` replaces the next two rules with a git worktree per writer.
 - Independent whole files/subtrees may be written concurrently in one checkout with explicit writable and forbidden paths. Ownership is cooperative convention, not locking or isolation; no jj workspace per worker is required.
 - One integrator stages shared interfaces and owns shared files, manifests/lockfiles, snapshots/history, repo-wide formatting/codegen, and integrated tests. During a write wave, it avoids competing edits and history operations; all delegates, including readers, run no jj or broad mutating commands. Worker tests require independent inputs/output resources.

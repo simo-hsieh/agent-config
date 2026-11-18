@@ -1,9 +1,6 @@
 {
   "permissions": {
     "deny": [
-      "Agent",
-      "Task",
-      "TeamCreate",
       "Bash(git push:*)",
       "Bash(jj git push:*)",
       "Bash(gh pr create:*)",

@@ -22,9 +22,9 @@ $AGENT_SRC (default ~/.agents/src) at that export, and links installed paths
 into $AGENT_SRC. Only the commit last installed is live. Without --rev it
 installs HEAD and refuses uncommitted changes; --rev <older commit> rolls back.
 With no component arguments, installs all supported adapters.
-Full Pi settings are opt-in. Native subagent controls are always applied:
-merge Claude tool denies and remove Pi's subagent package, preserving other
-settings. Replaced files are backed up outside harness discovery directories;
+Full Pi settings are opt-in. Subagent definitions are linked, and Agent, Task,
+and TeamCreate denies left by earlier installs are removed from Claude settings,
+preserving other settings. Replaced files are backed up outside harness discovery directories;
 only the 10 newest timestamped backup runs are kept.
 EOF
 }
@@ -194,38 +194,29 @@ os.replace(staged, src)
 ' "$RELEASE" "$SRC"
 }
 
-# Merge only single-agent controls; never replace machine-local hooks or permissions.
-disable_subagents() {
-  kind=$1
-  dst=$2
-  note "check  $dst (disable native subagents)"
-  python3 - "$kind" "$dst" "$LIST/claude/settings.json" "$BACKUP_ROOT" "$DRY_RUN" <<'PY'
+# Remove the subagent tool denies earlier installs merged in; leave every other
+# machine-local permission and hook alone.
+allow_subagents() {
+  dst=$1
+  [ -f "$dst" ] || return 0
+  note "check  $dst (allow native subagents)"
+  python3 - "$dst" "$BACKUP_ROOT" "$DRY_RUN" <<'PY'
 import json
 import os
 import sys
 from pathlib import Path
 
-kind, filename, policy, backup_root, dry_run = sys.argv[1:]
+filename, backup_root, dry_run = sys.argv[1:]
 path = Path(filename)
-config = json.loads(path.read_text()) if path.exists() else {}
+config = json.loads(path.read_text())
 before = json.dumps(config, sort_keys=True)
-if kind == "claude":
-    deny = config.setdefault("permissions", {}).setdefault("deny", [])
-    for tool in json.loads(Path(policy).read_text())["permissions"]["deny"]:
-        if tool not in deny:
-            deny.append(tool)
-else:
-    config.pop("subagents", None)
-    for resource in ("packages", "extensions"):
-        if resource in config:
-            config[resource] = [
-                item for item in config[resource]
-                if "pi-subagents" not in (item["source"] if isinstance(item, dict) else item)
-            ]
+deny = config.get("permissions", {}).get("deny")
+if deny is not None:
+    config["permissions"]["deny"] = [t for t in deny if t not in ("Agent", "Task", "TeamCreate")]
 if before == json.dumps(config, sort_keys=True):
-    print(f"ok     {path} (single-agent controls)")
+    print(f"ok     {path} (subagents allowed)")
 else:
-    print(f"update {path} (single-agent controls)")
+    print(f"update {path} (subagents allowed)")
     if dry_run != "1":
         if path.exists() or path.is_symlink():
             backup = Path(backup_root) / path.relative_to(Path.home())
@@ -251,17 +242,13 @@ prune_backups() {
     done
 }
 
-# Retire only definitions and runtime links owned by this installer.
-retire_subagents() {
-  dir=$1
-  [ -d "$dir" ] || return 0
-  for item in "$dir"/*; do
-    [ -L "$item" ] || continue
-    case "$(readlink "$item")" in
-      "$SRC"/claude/agents/*|"$SRC"/pi/agents/*|"$SRC"/pi/subagents.json)
-        backup_item "$item" ;;
-    esac
+# Link each agent definition in <repo dir> into <harness dir>.
+link_agents() {
+  for agent in "$LIST"/$1/*.md; do
+    [ -f "$agent" ] || continue
+    link_item "$1/${agent##*/}" "$2/${agent##*/}"
   done
+  prune_dangling "$2"
 }
 
 resolve_commit
@@ -279,8 +266,8 @@ if want claude; then
   link_item AGENTS.md "$HOME/.claude/CLAUDE.md"
   link_skills "$HOME/.claude/skills"
   prune_dangling "$HOME/.claude/skills"
-  retire_subagents "$HOME/.claude/agents"
-  disable_subagents claude "$HOME/.claude/settings.json"
+  link_agents claude/agents "$HOME/.claude/agents"
+  allow_subagents "$HOME/.claude/settings.json"
 fi
 
 if want pi; then
@@ -288,9 +275,8 @@ if want pi; then
   if [ "$WITH_SETTINGS" -eq 1 ]; then
     link_item pi/settings.json "$HOME/.pi/agent/settings.json"
   fi
-  retire_subagents "$HOME/.pi/agent/agents"
-  retire_subagents "$HOME/.pi/agent/extensions/subagent"
-  disable_subagents pi "$HOME/.pi/agent/settings.json"
+  link_agents pi/agents "$HOME/.pi/agent/agents"
+  link_item pi/subagents.json "$HOME/.pi/agent/extensions/subagent/config.json"
 fi
 
 if want agy; then

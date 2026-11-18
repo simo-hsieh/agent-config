@@ -17,9 +17,9 @@ skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   learn/       evidence-learning-loop, reflect, correct
   operate/     delegate
   tools/       jj, agent-browser, notion-mcp
-claude/        legacy agent definitions, settings, delegate tab deny list
+claude/        subagent definitions, delegate tab deny list
 pi/            subagent definitions, settings.json, runtime limits
-agy/           no-subagents hook plugin and delegate tab deny list
+agy/           delegate tab deny list
 models.md      model and effort per harness tier, task routing, evidence
 bin/           model-usage: per-model delegate stats from session logs
 install.sh     publishes one git commit as ~/.agents/src and links harnesses to it
@@ -59,8 +59,7 @@ Settings are opt-in (`--with-settings`) because replacing them can disable local
 - **Orchestrator:** the session you steer, normally Claude Code on Opus 5.5, does design, hard bugs, and final review. Opus is not allowed in Pi.
 - **Delegates:** inside Herdr, the `delegate` skill runs `researcher` and `worker` work in a thinking or fast tab of Claude Code, Pi (GPT-6.1), or agy (Gemini 4), chosen by task type. Cross-family seats (`arena`, `interrogate`, `reflect`) take any family other than the author's.
 - **Out of quota:** a tab that hits a usage limit is marked blocked for the session and its work goes to the next tab in its Task map row; with every other harness blocked, the orchestrator does the work itself. When the orchestrator's own harness hits its limit, continue in a Pi or agy session; the same skills and `models.md` apply there.
-- **Coordination:** delegate when benefit exceeds overhead, without a large-task threshold or a required committee. Independent whole files/subtrees can share a checkout under explicit writable/forbidden paths and one integrator. Shared interfaces are staged first; shared mutations and jj history wait for the write barrier. Ownership is cooperative convention, not locking or isolation; workers need no separate jj workspace. See [`delegate`](skills/operate/delegate/SKILL.md) for command, test, runtime, and barrier rules.
-- **Outside Herdr:** work in the main session. Native subagents, teams, workflows, and swarms are disabled in every harness; Herdr delegation stays flat.
+- **Coordination:** delegation is a conversation between models, guided by patterns rather than limits. Any agent may delegate, through native subagents, Herdr tabs, or another harness, and quality comes before cost. When several agents write in one checkout, one integrator owns shared files and history and writers keep to their own files; see [`delegate`](skills/operate/delegate/SKILL.md).
 
 ```mermaid
 flowchart LR
