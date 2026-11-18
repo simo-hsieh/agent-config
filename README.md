@@ -17,9 +17,9 @@ skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   learn/       evidence-learning-loop, reflect, correct
   operate/     delegate
   tools/       jj, agent-browser, notion-mcp
-claude/        subagent definitions, delegate tab deny list
-pi/            subagent definitions, settings.json, runtime limits
-agy/           delegate tab deny list
+claude/        harness.md, subagent definitions, delegate tab deny list
+pi/            harness.md, subagent definitions, settings.json, subagent runtime config
+agy/           harness.md, delegate tab deny list
 models.md      model and effort per harness tier, task routing, evidence
 bin/           model-usage: per-model delegate stats from session logs
 install.sh     publishes one git commit as ~/.agents/src and links harnesses to it

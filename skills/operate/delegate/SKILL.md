@@ -5,7 +5,7 @@ description: Runs delegated work in a Herdr tab on Claude Code, Pi, or agy, pick
 
 # Delegate through Herdr
 
-Delegation is a conversation between models. Delegate in a Herdr tab, so the user can watch and read the work in its pane; use a native subagent only when no tab fits. Any agent may delegate, including a delegate. Hand off whole tasks with a clear boundary and target, such as research, a codemod, or a test run; the orchestrator keeps the design and main work, and the context behind them. For CLI details, run `herdr --skill`. Parse IDs from JSON output; never guess them.
+Delegation is a conversation between models. Delegate in a Herdr tab, so the user can watch and read the work in its pane; the harness section of your instructions says when a native subagent fits instead. Any agent may delegate, including a delegate. Hand off whole tasks with a clear boundary and target, such as research, a codemod, or a test run; the orchestrator keeps the design and main work, and the context behind them. For CLI details, run `herdr --skill`. Parse IDs from JSON output; never guess them.
 
 ## Pick a model
 

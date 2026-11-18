@@ -21,6 +21,7 @@ Delegation reaches only Pi, through `pi-delegate`, and only from Claude Code. Ea
 - Delegates never push, merge, open PRs, or move bookmarks.
 - Delegation is communication between models, guided by patterns rather than limits. Any agent, including a delegate, may delegate, in a Herdr tab the user can watch, or a native subagent when no tab fits; quality comes before cost (decided 2026-11-18 and 2026-11-19, `../multi-agent/intent.md`).
 - Each concurrent writer works in its own git worktree and branch; one integrator merges them and runs the integrated tests (`../git/design.md`).
+- Rules true in only one harness live in `<harness>/harness.md`; the installer joins the shared `AGENTS.md` and that file into the harness's instructions file (multi-agent review D18, 2026-11-19).
 - Files a harness rewrites at runtime (settings, trust lists, auth) stay machine-local.
 - Pi, Codex, opencode, and Hermes share one ChatGPT quota and model family, so only one of them earns a tab: Pi.
 - Each paid subscription needs its own harness, so none can be dropped without wasting a subscription: Opus runs only in Claude Code (README, Models), and Pi 0.71.0 removed its built-in Antigravity login (Pi CHANGELOG), so the Google subscription is reachable only through agy.

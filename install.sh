@@ -163,6 +163,7 @@ export_release() {
     mkdir "$LIST"
   fi
   git -C "$ROOT" archive "$COMMIT" | tar -x -C "$LIST"
+  build_instructions
   chmod -R a-w "$LIST"
   note "export $(git -C "$ROOT" log -1 --format='%h %s' "$COMMIT") -> $RELEASE"
   if [ "$DRY_RUN" -eq 0 ]; then
@@ -171,6 +172,22 @@ export_release() {
     chmod a-w "$RELEASE"
     LIST=$RELEASE
   fi
+}
+
+# Each harness reads the shared AGENTS.md followed by its own <harness>/harness.md,
+# joined into build/<harness>.md inside the release.
+build_instructions() {
+  mkdir "$LIST/build"
+  for harness in claude pi agy; do
+    [ -f "$LIST/$harness/harness.md" ] || continue
+    { cat "$LIST/AGENTS.md"; printf '\n'; cat "$LIST/$harness/harness.md"; } > "$LIST/build/$harness.md"
+  done
+}
+
+# Prints the release path of a harness's instructions; releases older than the
+# per-harness files fall back to the shared AGENTS.md.
+instructions() {
+  if [ -f "$LIST/build/$1.md" ]; then echo "build/$1.md"; else echo AGENTS.md; fi
 }
 
 # Swaps the live link in one rename, so readers see the old or new release, never a mix.
@@ -263,7 +280,7 @@ link_item rules/coding.md "$HOME/.agents/rules/coding.md"
 retire_legacy
 
 if want claude; then
-  link_item AGENTS.md "$HOME/.claude/CLAUDE.md"
+  link_item "$(instructions claude)" "$HOME/.claude/CLAUDE.md"
   link_skills "$HOME/.claude/skills"
   prune_dangling "$HOME/.claude/skills"
   link_agents claude/agents "$HOME/.claude/agents"
@@ -271,7 +288,7 @@ if want claude; then
 fi
 
 if want pi; then
-  link_item AGENTS.md "$HOME/.pi/agent/AGENTS.md"
+  link_item "$(instructions pi)" "$HOME/.pi/agent/AGENTS.md"
   if [ "$WITH_SETTINGS" -eq 1 ]; then
     link_item pi/settings.json "$HOME/.pi/agent/settings.json"
   fi
@@ -280,7 +297,7 @@ if want pi; then
 fi
 
 if want agy; then
-  link_item AGENTS.md "$HOME/.gemini/config/AGENTS.md"
+  link_item "$(instructions agy)" "$HOME/.gemini/config/AGENTS.md"
   link_skills "$HOME/.gemini/config/skills"
   prune_dangling "$HOME/.gemini/config/skills"
   for plugin in "$LIST"/agy/plugins/*; do
