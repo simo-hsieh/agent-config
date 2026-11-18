@@ -1,10 +1,9 @@
 # Personal agent configuration
 
-Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. `shared/AGENTS.md` holds the always-on rules every harness follows; each adapter adds a short `<harness>/harness.md`, and the installer joins the two into that harness's instructions file. Everything else loads on demand. Claude Code, Pi, and Antigravity (`agy`) are thin adapters.
+Source of truth for coding-agent behavior, tuned for Claude Opus 5.5. Root `AGENTS.md` holds the always-on rules every harness follows. The installer appends `<harness>/harness.md` when present. Everything else loads on demand. Claude Code, Pi, and Antigravity (`agy`) are thin adapters.
 
 ```text
-shared/        AGENTS.md: always-on rules for every harness (communication, scope, playbooks, git, delegation, safety)
-AGENTS.md      conventions for working in this repo only
+AGENTS.md      always-on rules for every harness (communication, scope, playbooks, git, delegation, safety)
 rules/         coding — read by the agent before writing code
 skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   playbooks/   investigation, bugfix, feature, perf, ship, long-run (routed by AGENTS.md)
@@ -19,7 +18,7 @@ skills/        <intent>/<skill>/SKILL.md, installed flat by skill name
   operate/     delegate
   tools/       agent-browser, notion-mcp
 claude/        harness.md, subagent definitions, delegate tab deny list
-pi/            harness.md, subagent definitions, settings.json, subagent runtime config
+pi/            harness.md, settings.json
 agy/           harness.md, delegate tab deny list
 models.md      model and effort per harness tier, task routing, evidence
 bin/           model-usage: per-model delegate stats from session logs
@@ -48,7 +47,6 @@ git commit -am "..." && ./install.sh   # go live with HEAD
 | `skills/<intent>/<skill>`, `rules/*` | `~/.agents/skills/<skill>`, `~/.agents/rules/` (skills also to `~/.claude/skills/<skill>` and `~/.gemini/config/skills/<skill>`) |
 | `AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.pi/agent/AGENTS.md`, `~/.gemini/config/AGENTS.md` |
 | `claude/agents/*.md` | `~/.claude/agents/` |
-| `pi/agents/*.md`, `pi/subagents.json` | `~/.pi/agent/agents/`, `~/.pi/agent/extensions/subagent/config.json` |
 | `agy/plugins/*` | `~/.gemini/config/plugins/` |
 
 Settings are opt-in (`--with-settings`) because replacing them can disable local hooks or permissions. Restart agent sessions after installing.
@@ -75,7 +73,9 @@ flowchart LR
 
 ## Editing
 
-Edit here, never the installed copies. Keep every line behavior-changing: no emphasis words, no duplicated rules, no instructions the model follows by default. Review config changes like code; a global instruction affects every repository.
+Edit here, never the installed copies. Shared rules belong in root `AGENTS.md`. Keep optional `<harness>/harness.md` files to about 12 lines of rules true only in that harness; versions, log paths, and repair steps belong in its README. When a harness keeps overriding a shared rule, fix the shared rule instead of adding an exception.
+
+Keep every line behavior-changing: no emphasis words, no duplicated rules, no instructions the model follows by default. Review config changes like code; a global instruction affects every repository. Skill names must be unique across `skills/<intent>/<name>/`. Record decisions in `docs/agent-flow/<topic>/intent.md` and `design.md`, and update them with the change they describe. Before committing, run `./install.sh --dry-run`; the installer publishes only committed work.
 
 Many skills and playbooks are adapted from [pstack](https://github.com/cursor/plugins/tree/main/pstack) (MIT, Lauren Tan; notice in `LICENSE`); `docs/agent-flow/intent.md` records each adoption decision.
 

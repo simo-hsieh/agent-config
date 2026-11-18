@@ -137,9 +137,13 @@ Each concurrent writer works in its own git worktree and branch, so writers neve
 
 Claude Code's web search runs on Brave (Anthropic subprocessor list; Simon Willison, 2025-03-21). Pi's `web_search` uses OpenAI search through the ChatGPT subscription when `~/.pi/web-search.json` sets `"provider": "openai"`. agy grounds on Google (third-party write-ups, UNVERIFIED). `auto-research` sends each question to the three fast tabs and merges by R8. A fan-out costs three fast tasks of quota, so a single lookup stays on one tab.
 
+### Instruction installation
+
+Root `AGENTS.md` is the shared source. `build_instructions` appends `<harness>/harness.md` when present; otherwise `instructions` returns `AGENTS.md` directly. Older revisions with `shared/AGENTS.md` still use that file for rollback, because their root file contains repo-only conventions. Those conventions now live in `README.md`.
+
 ### Native subagents
 
-Native subagents are allowed in every harness but used only when no Herdr tab fits: their work is invisible to the user and has been lower quality than the orchestrator's own (user, 2026-11-19). Delegated work runs in Herdr tabs the user can watch. The installer links the `claude/agents` and `pi/agents` definitions and removes the `Agent`, `Task`, and `TeamCreate` denies that earlier installs merged into `~/.claude/settings.json`.
+Native subagents are allowed in every harness but used only when no Herdr tab fits: their work is invisible to the user and has been lower quality than the orchestrator's own (user, 2026-11-19). Delegated work runs in Herdr tabs the user can watch. The installer links the `claude/agents` definitions and removes the `Agent`, `Task`, and `TeamCreate` denies that earlier installs merged into `~/.claude/settings.json`. Pi delegation uses Herdr without agent definition files. The retired Pi researcher definition, subagent config, and compatibility patch had no installed extension consuming them. The installer prunes their managed links with `prune_dangling`, leaving user-owned files alone. Pi's always-on instructions retain only the OpenAI-routing rule; shared rules, tool descriptions, and `models.md` cover the removed instructions.
 
 ### Usage review
 
@@ -155,7 +159,7 @@ Native subagents are allowed in every harness but used only when no Herdr tab fi
 | `install.sh`, `agy/README.md` | `agy` target linking the agy instructions and `skills/` into `~/.gemini/config/` without touching `hooks.json` | R1 |
 | `skills/verify/interrogate`, `skills/design/arena`, `skills/learn/reflect` | a seat from another family through `delegate`, with a rule for no family left | R5, R6 |
 | `skills/understand/auto-research/SKILL.md` | three-engine fan-out and merge | R8 |
-| `pi/settings.json`, `pi/agents/researcher.md`, `pi/README.md` | subagents inherit the tab's model; record the OpenAI search provider | R2, R8 |
+| `pi/settings.json`, `pi/README.md` | record Pi defaults and the OpenAI search provider; Herdr passes each delegate's model explicitly | R2, R8 |
 | `README.md`, Models | link to `models.md` instead of naming models | R2 |
 | `bin/model-usage` | per-model run statistics from session logs | R2, R7 |
 
@@ -212,7 +216,7 @@ Decision: route by task type through the Task map, reordered only on evidence (R
 ## Plan
 
 1. Write `skills/operate/delegate/SKILL.md` with the call sites, contract, quota rules, and per-harness start arguments; delete `pi-delegate`.
-2. Update AGENTS.md Delegation, `claude/delegate.json`, the three cross-family skills, `auto-research`, the Pi subagent model settings, the READMEs, and `bin/model-usage`.
+2. Update AGENTS.md Delegation, `claude/delegate.json`, the three cross-family skills, `auto-research`, the Pi model settings, the READMEs, and `bin/model-usage`.
 3. Smoke runs: one task per harness on its fast tier returns a status-lined report; a delegate asked to start a Herdr agent refuses (R1, R3, R4).
 4. Time one task of each fast Task map row on `pi-fast` and `agy-fast`, and one on agy Carbon against Argon, and record the results in `models.md` (R2).
 5. One `arena` frontend task across the three thinking tiers; record the winner in the Task map's UI row.

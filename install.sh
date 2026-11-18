@@ -22,7 +22,7 @@ $AGENT_SRC (default ~/.agents/src) at that export, and links installed paths
 into $AGENT_SRC. Only the commit last installed is live. Without --rev it
 installs HEAD and refuses uncommitted changes; --rev <older commit> rolls back.
 With no component arguments, installs all supported adapters.
-Full Pi settings are opt-in. Subagent definitions are linked. Claude and agy
+Full Pi settings are opt-in. Claude subagent definitions are linked. Claude and agy
 settings get managed fields merged in (push and merge denies; agy's default
 model), preserving all other settings. Replaced files are backed up outside harness discovery directories;
 only the 10 newest timestamped backup runs are kept.
@@ -174,12 +174,11 @@ export_release() {
   fi
 }
 
-# Each harness reads the shared rules followed by its own <harness>/harness.md,
-# joined into build/<harness>.md inside the release. The shared rules live in
-# shared/AGENTS.md (the repo-root AGENTS.md before 2026-11-19).
+# Append optional harness rules to root AGENTS.md inside the release.
+# Older commits kept global rules in shared/AGENTS.md and repo-only rules at root.
 build_instructions() {
-  shared=$LIST/shared/AGENTS.md
-  [ -f "$shared" ] || shared=$LIST/AGENTS.md
+  shared=$LIST/AGENTS.md
+  [ ! -f "$LIST/shared/AGENTS.md" ] || shared=$LIST/shared/AGENTS.md
   mkdir "$LIST/build"
   for harness in claude pi agy; do
     [ -f "$LIST/$harness/harness.md" ] || continue
@@ -307,8 +306,8 @@ if want pi; then
   if [ "$WITH_SETTINGS" -eq 1 ]; then
     link_item pi/settings.json "$HOME/.pi/agent/settings.json"
   fi
-  link_agents pi/agents "$HOME/.pi/agent/agents"
-  link_item pi/subagents.json "$HOME/.pi/agent/extensions/subagent/config.json"
+  prune_dangling "$HOME/.pi/agent/agents"
+  prune_dangling "$HOME/.pi/agent/extensions/subagent"
 fi
 
 if want agy; then

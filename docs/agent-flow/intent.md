@@ -32,7 +32,8 @@ skills/playbooks/<playbook>/SKILL.md
 skills/<intent>/<skill>/SKILL.md
   understand/   clarify/   design/   build/   verify/
   write/        learn/     operate/  tools/
-claude/agents/, pi/agents/     executors: researcher, worker (+ others if adopted)
+claude/agents/                native executors: researcher, worker
+skills/operate/delegate/      Herdr tabs for Claude Code, Pi, and agy
 ```
 
 ```mermaid
@@ -322,8 +323,8 @@ Out of scope: benny automations, make-bot-ui, worktree-cleanup.
   "make the call and continue" and Safety lines. That Communication line is
   the one home for when to ask: only for a preference or product call no
   experiment can settle; playbooks refer to it instead of restating it.
-- Model per role: the model lives only in agent config
-  (`claude/agents/*.md`, `pi/subagents.json`, `pi/settings.json`);
+- Model per role: `models.md` owns delegate model IDs and effort.
+  `claude/agents/*.md` and `pi/settings.json` retain their native defaults;
   AGENTS.md and skills name roles and model families, never model IDs.
 - `poteto-help`, `setup-pstack`, `poteto-agent`: skipped.
 - Consistency: each rule has one home (AGENTS.md, `rules/coding.md`, a

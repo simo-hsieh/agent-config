@@ -54,7 +54,7 @@ Real use: not yet measured. Record runs, DONE rate, median minutes, and tokens p
 Harnesses read these files directly, so they keep their own IDs. Change them in the same topic as the role map.
 
 - `claude/agents/worker.md` and `claude/agents/researcher.md`: `model: sonnet`
-- `pi/settings.json`: `defaultModel`, `defaultThinkingLevel`, and `subagents.modelScope.allow`; subagents inherit the tab's model (`subagents.defaultModel` unset, `pi/agents/researcher.md` has `model: inherit`)
+- `pi/settings.json`: `defaultModel` and `defaultThinkingLevel`; Herdr delegate launches pass the model and effort explicitly.
 
 ## Review
 

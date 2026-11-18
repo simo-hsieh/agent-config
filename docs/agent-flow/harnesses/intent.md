@@ -30,13 +30,14 @@ Delegation reaches only Pi, through `pi-delegate`, and only from Claude Code. Ea
 
 Each harness's thinking model reviewed its own configuration, then answered the other two (page: https://claude.ai/artifact/VWSPLKcBwPcx2dDYDrF2kW; numbered H# there).
 
-1. Shared rules live in `shared/AGENTS.md` (~62 lines); each `<harness>/harness.md` holds at most ~12 lines that name a tool, flag, path, mode, engine, or model list only that harness has; versions, log paths, and repair steps go in `<harness>/README.md`. When a harness keeps overriding a shared rule, the shared rule is fixed (H1, H8).
+1. Shared rules live in root `AGENTS.md`; an optional `<harness>/harness.md` holds at most ~12 lines that name a tool, flag, path, mode, engine, or model list only that harness has; versions, log paths, and repair steps go in `<harness>/README.md`. When a harness keeps overriding a shared rule, the shared rule is fixed (H1, H8).
 2. The jj-to-git migration is applied to the instructions and skills (H2).
 3. agy finishes work in its own turn: no subagents, workflows, swarms, or backgrounded commands, because they end the turn early (H3).
 4. Claude Code does not use its claude.ai Google connectors; Google data comes only through `gog-readonly` (H4).
-5. The installer merges `git push` and `gh pr merge` denies into Claude's and agy's settings and sets agy's default model to Carbon; agy delegate tabs also deny `git merge` and `git branch -f`. Pi has no deny mechanism, which `pi/harness.md` states (H5, H6).
+5. The installer merges `git push` and `gh pr merge` denies into Claude's and agy's settings and sets agy's default model to Carbon; agy delegate tabs also deny `git merge` and `git branch -f`. Pi has no deny mechanism, which `pi/README.md` records (H5, H6).
 6. Pi's web tools load again and search through OpenAI, restoring the third engine (H7).
 7. `bin/model-usage` reads agy's JSONL transcripts (H9).
+8. Keep one shared `AGENTS.md` at the repository root, not a second copy under `shared/`. The installer appends harness-specific rules when present. Repo maintenance conventions live in `README.md` (user, 2026-11-19).
 
 
 - Codex: dropped. Same quota and models as Pi, and Herdr tabs replace its headless `codex exec` mode.
